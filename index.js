@@ -1970,21 +1970,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (sprite) {
                 const JUMP_HEIGHT = (${height});
                 const DURATION_MS = 500;
-                const startY = sprite.y;
+                const startY = sprite.y; // Store original Y position
                 const startTime = Date.now();
                 let elapsedTime = 0;
                 log(sprite.name + ' starts jumping...');
 
                 while (elapsedTime < DURATION_MS) {
-                     if (getExecutionCancelled()) {
-                        sprite.y = startY;
-                        break;
-                    }
+                    if (getExecutionCancelled()) break; // Just break, we'll handle reset below
+                    
                     elapsedTime = Date.now() - startTime;
                     const progress = Math.min(1, elapsedTime / DURATION_MS);
                     
-                    // Parabolic function for jump arc: y = -4h * x * (x - 1)
-                    // where h is height and x is progress (0 to 1)
+                    // Parabolic function for a natural jump arc
                     const parabolicProgress = -4 * JUMP_HEIGHT * progress * (progress - 1);
                     sprite.y = startY + parabolicProgress;
                     
@@ -1992,9 +1989,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     yield;
                 }
 
+                // ALWAYS reset the sprite's Y position to its starting point after the animation.
+                // This ensures it lands exactly where it started, whether the jump finished or was cancelled.
+                sprite.y = startY;
+                window.refreshSprite(sprite);
                 if (!getExecutionCancelled()) {
-                    sprite.y = startY;
-                    window.refreshSprite(sprite);
                     log(sprite.name + ' finished jumping.');
                 }
             }
