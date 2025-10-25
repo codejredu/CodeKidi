@@ -792,6 +792,7 @@ document.addEventListener('DOMContentLoaded', () => {
             animation: null,
             gifSpeed: gifSpeed,
             sounds: [],
+            isJumping: false,
             zIndex: nextZIndex++,
         };
         
@@ -1967,35 +1968,45 @@ document.addEventListener('DOMContentLoaded', () => {
     Blockly.JavaScript['motion_jump'] = function(block) {
         const height = Blockly.JavaScript.valueToCode(block, 'HEIGHT', Blockly.JavaScript.ORDER_ATOMIC) || '100';
         return `
-            if (sprite) {
-                const JUMP_HEIGHT = (${height});
-                const DURATION_MS = 500;
-                const startY = sprite.y; // Store original Y position
-                const startTime = Date.now();
-                let elapsedTime = 0;
-                log(sprite.name + ' starts jumping...');
-
-                while (elapsedTime < DURATION_MS) {
-                    if (getExecutionCancelled()) break; // Just break, we'll handle reset below
+            if (sprite && !sprite.isJumping) {
+                sprite.isJumping = true;
+                const startY = sprite.y; // Store original Y position BEFORE the try block
+                
+                try {
+                    const JUMP_HEIGHT = (${height});
+                    const DURATION_MS = 500;
+                    const startTime = Date.now();
+                    let elapsedTime = 0;
+                    log(sprite.name + ' starts jumping...');
+    
+                    while (elapsedTime < DURATION_MS) {
+                        if (getExecutionCancelled()) {
+                            break; 
+                        }
+                        
+                        elapsedTime = Date.now() - startTime;
+                        const progress = Math.min(1, elapsedTime / DURATION_MS);
+                        
+                        const parabolicProgress = -4 * JUMP_HEIGHT * progress * (progress - 1);
+                        sprite.y = startY + parabolicProgress;
+                        
+                        window.refreshSprite(sprite);
+                        yield;
+                    }
                     
-                    elapsedTime = Date.now() - startTime;
-                    const progress = Math.min(1, elapsedTime / DURATION_MS);
-                    
-                    // Parabolic function for a natural jump arc
-                    const parabolicProgress = -4 * JUMP_HEIGHT * progress * (progress - 1);
-                    sprite.y = startY + parabolicProgress;
-                    
+                    if (!getExecutionCancelled()) {
+                        log(sprite.name + ' finished jumping.');
+                    }
+                } finally {
+                    // This ALWAYS runs, ensuring the sprite lands correctly and the state is reset.
+                    sprite.y = startY;
+                    sprite.isJumping = false;
                     window.refreshSprite(sprite);
-                    yield;
+                    log(sprite.name + ' jump state reset and landed.');
                 }
-
-                // ALWAYS reset the sprite's Y position to its starting point after the animation.
-                // This ensures it lands exactly where it started, whether the jump finished or was cancelled.
-                sprite.y = startY;
-                window.refreshSprite(sprite);
-                if (!getExecutionCancelled()) {
-                    log(sprite.name + ' finished jumping.');
-                }
+            } else if (sprite) {
+                // If already jumping, just wait for the next tick.
+                yield;
             }
         `;
     };
@@ -2811,6 +2822,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 sprite.animation.currentFrame = 0;
                 drawGifFrame(sprite);
             }
+            
+            sprite.isJumping = false; // Fail-safe to reset jump state for all sprites
         });
 
         if (currentPreviewAudio) {
@@ -3002,6 +3015,7 @@ document.addEventListener('DOMContentLoaded', () => {
         spriteData.gifSpeed = gifSpeed || 1.0;
         spriteData.animation = null; // Will be loaded async
         spriteData.sounds = sounds || [];
+        spriteData.isJumping = false; // Runtime state, always reset on load
         spriteData.zIndex = zIndex || nextZIndex++; // Use loaded zIndex or assign a new one
         sprites[id] = spriteData;
 
@@ -3765,3 +3779,4 @@ document.addEventListener('DOMContentLoaded', () => {
     createDefaultSprite();
     requestAnimationFrame(tick);
 });
+      
