@@ -1327,11 +1327,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     Blockly.JavaScript['event_broadcast'] = function(block) {
         const message = block.getFieldValue('MESSAGE');
+        // Sanitize the block ID and add a random suffix to ensure the variable is unique
+        // across different script executions, preventing global scope conflicts.
+        const uniqueSuffix = Math.random().toString(36).substring(2, 9);
+        const eventVar = `event_${block.id.replace(/[^a-zA-Z0-9]/g, '_')}_${uniqueSuffix}`;
         return `
             log('Broadcasting message: ${message}');
-            const event = new CustomEvent('kidi-broadcast', { detail: { message: '${message}' } });
-            window.dispatchEvent(event);
-            yield;
+            const ${eventVar} = new CustomEvent('kidi-broadcast', { detail: { message: '${message}' } });
+            window.dispatchEvent(${eventVar});
         `;
     };
 
@@ -1493,8 +1496,9 @@ document.addEventListener('DOMContentLoaded', () => {
     Blockly.JavaScript['looks_say_for_secs'] = function(block) {
         const message = Blockly.JavaScript.valueToCode(block, 'MESSAGE', Blockly.JavaScript.ORDER_ATOMIC) || "''";
         const secs = Blockly.JavaScript.valueToCode(block, 'SECS', Blockly.JavaScript.ORDER_ATOMIC) || '2';
-        // Sanitize the block ID to create a valid JavaScript variable name.
-        const varName = `endTime_${block.id.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        // Sanitize the block ID and add a random suffix to ensure the variable is unique.
+        const uniqueSuffix = Math.random().toString(36).substring(2, 9);
+        const varName = `endTime_${block.id.replace(/[^a-zA-Z0-9]/g, '_')}_${uniqueSuffix}`;
         return `
             if (sprite) {
                 const spriteEl = document.getElementById(sprite.id);
@@ -1807,8 +1811,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     Blockly.JavaScript['control_wait_secs'] = function(block) {
         const secs = Blockly.JavaScript.valueToCode(block, 'SECS', Blockly.JavaScript.ORDER_ATOMIC) || '1';
-        // Sanitize the block ID to create a valid JavaScript variable name.
-        const varName = `endTime_${block.id.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        // Sanitize the block ID and add a random suffix to ensure the variable is unique.
+        const uniqueSuffix = Math.random().toString(36).substring(2, 9);
+        const varName = `endTime_${block.id.replace(/[^a-zA-Z0-9]/g, '_')}_${uniqueSuffix}`;
         return `
             log('Waiting for ' + (${secs}) + ' seconds...');
             const ${varName} = Date.now() + (${secs}) * 1000;
@@ -3779,4 +3784,3 @@ document.addEventListener('DOMContentLoaded', () => {
     createDefaultSprite();
     requestAnimationFrame(tick);
 });
-      
