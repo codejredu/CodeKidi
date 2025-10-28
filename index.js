@@ -267,6 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Main Application Elements ---
     const stageArea = document.getElementById('stage-area');
+    const leftPanel = document.querySelector('.left-panel');
     const containerWrapper = document.getElementById('container-wrapper');
     const spritesList = document.getElementById('sprites-list');
     const backdropsList = document.getElementById('backdrops-list');
@@ -293,6 +294,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const propRotationAllAround = document.getElementById('rotation-all-around');
     const propRotationLeftRight = document.getElementById('rotation-left-right');
     const propRotationDontRotate = document.getElementById('rotation-dont-rotate');
+    const scrollUpBtn = document.getElementById('scroll-up-btn');
+    const scrollDownBtn = document.getElementById('scroll-down-btn');
     
     // --- Angle Picker elements ---
     const anglePickerWidget = document.getElementById('angle-picker-widget');
@@ -3177,610 +3180,535 @@ document.addEventListener('DOMContentLoaded', () => {
             }
              if (top < 5) top = 5;
             if (top + widgetHeight > window.innerHeight) top = window.innerHeight - widgetHeight - 5;
-
-            anglePickerWidget.style.top = `${top}px`;
+            
             anglePickerWidget.style.left = `${left}px`;
-            anglePickerHandle.style.transform = `rotate(${sprite.direction - 90}deg)`;
+            anglePickerWidget.style.top = `${top}px`;
+
+            const currentAngleRad = (sprite.direction - 90) * Math.PI / 180;
+            anglePickerHandle.style.transform = `rotate(${currentAngleRad}rad)`;
+            
+            const onAngleDrag = (moveEvent) => {
+                moveEvent.preventDefault();
+                const dialRect = anglePickerDial.getBoundingClientRect();
+                const centerX = dialRect.left + dialRect.width / 2;
+                const centerY = dialRect.top + dialRect.height / 2;
+                const pointer = moveEvent.touches ? moveEvent.touches[0] : moveEvent;
+                const angleRad = Math.atan2(pointer.clientY - centerY, pointer.clientX - centerX);
+                let angleDeg = angleRad * 180 / Math.PI;
+
+                let newDirection = Math.round(angleDeg + 90);
+                if (newDirection < 0) newDirection += 360;
+
+                sprite.direction = newDirection;
+                propDirection.value = newDirection;
+                anglePickerHandle.style.transform = `rotate(${angleRad}rad)`;
+                window.refreshSprite(sprite);
+            };
+
+            const onAngleDragEnd = () => {
+                document.removeEventListener('mousemove', onAngleDrag);
+                document.removeEventListener('mouseup', onAngleDragEnd);
+                document.removeEventListener('touchmove', onAngleDrag);
+                document.removeEventListener('touchend', onAngleDragEnd);
+            };
+
+            anglePickerDial.addEventListener('mousedown', (downEvent) => {
+                onAngleDrag(downEvent); // Set initial angle
+                document.addEventListener('mousemove', onAngleDrag);
+                document.addEventListener('mouseup', onAngleDragEnd, { once: true });
+            });
+            anglePickerDial.addEventListener('touchstart', (downEvent) => {
+                onAngleDrag(downEvent); // Set initial angle
+                document.addEventListener('touchmove', onAngleDrag, { passive: false });
+                document.addEventListener('touchend', onAngleDragEnd, { once: true });
+            }, { passive: false });
+            
+            // Hide on next click anywhere
+            const hideOnClickOutside = (event) => {
+                if (!anglePickerWidget.contains(event.target) && event.target !== propDirection) {
+                    anglePickerWidget.style.display = 'none';
+                    document.removeEventListener('click', hideOnClickOutside, true);
+                }
+            };
+            setTimeout(() => document.addEventListener('click', hideOnClickOutside, true), 0);
         });
 
         propShow.addEventListener('click', () => {
             const sprite = getActiveSprite();
-            if (sprite) {
+            if(sprite) {
                 sprite.opacity = 1;
                 window.refreshSprite(sprite);
             }
         });
+
         propHide.addEventListener('click', () => {
             const sprite = getActiveSprite();
-            if (sprite) {
+            if(sprite) {
                 sprite.opacity = 0;
                 window.refreshSprite(sprite);
             }
         });
-        
-        // Rotation Style Listeners
-        propRotationAllAround.addEventListener('click', () => {
-            const sprite = getActiveSprite();
-            if (sprite) {
-                sprite.rotationStyle = 'all-around';
-                window.refreshSprite(sprite);
-            }
-        });
-        propRotationLeftRight.addEventListener('click', () => {
-            const sprite = getActiveSprite();
-            if (sprite) {
-                sprite.rotationStyle = 'left-right';
-                window.refreshSprite(sprite);
-            }
-        });
-        propRotationDontRotate.addEventListener('click', () => {
-            const sprite = getActiveSprite();
-            if (sprite) {
-                sprite.rotationStyle = 'dont-rotate';
-                window.refreshSprite(sprite);
-            }
-        });
 
-        // GIF Animation Panel Listeners
-        gifSpeedSlider.addEventListener('input', (e) => {
+        const setRotationStyle = (style) => {
             const sprite = getActiveSprite();
-            if (sprite && sprite.isGif) {
-                sprite.gifSpeed = Number(e.target.value);
-                gifSpeedValue.textContent = `${sprite.gifSpeed.toFixed(1)}x`;
+            if (sprite) {
+                sprite.rotationStyle = style;
+                window.refreshSprite(sprite);
             }
-        });
+        };
+
+        propRotationAllAround.addEventListener('click', () => setRotationStyle('all-around'));
+        propRotationLeftRight.addEventListener('click', () => setRotationStyle('left-right'));
+        propRotationDontRotate.addEventListener('click', () => setRotationStyle('dont-rotate'));
+
         gifPlayPauseBtn.addEventListener('click', () => {
             const sprite = getActiveSprite();
-            if (sprite && sprite.isGif && sprite.animation) {
+            if (sprite && sprite.animation) {
                 sprite.animation.previewIsPlaying = !sprite.animation.previewIsPlaying;
-                if(sprite.animation.previewIsPlaying) {
-                    sprite.animation.timeSinceLastFrame = 0; // Reset timer on play
-                }
-                updatePropertiesPanel(); // Update icon
+                updatePropertiesPanel();
             }
         });
+
+        gifSpeedSlider.addEventListener('input', (e) => {
+            const sprite = getActiveSprite();
+            const speed = Number(e.target.value);
+            if (sprite) {
+                sprite.gifSpeed = speed;
+                gifSpeedValue.textContent = `${speed.toFixed(1)}x`;
+            }
+        });
+
+        scrollUpBtn.addEventListener('click', () => {
+            leftPanel.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        scrollDownBtn.addEventListener('click', () => {
+            leftPanel.scrollTo({ top: leftPanel.scrollHeight, behavior: 'smooth' });
+        });
     }
-    
-    // --- Custom Angle Picker Logic ---
-    let isDraggingAngle = false;
 
-    const updateAngleFromEvent = (e) => {
-         const sprite = getActiveSprite();
-         if (!sprite) return;
+    function setupGalleryListeners() {
+        document.getElementById('add-sprite-button').addEventListener('click', () => openGallery(spriteGallery));
+        document.getElementById('add-backdrop-button').addEventListener('click', () => openGallery(backgroundGallery));
+        document.getElementById('add-sound-button').addEventListener('click', () => {
+            selectedSoundsForAdd.clear();
+            updateSoundGallerySelection();
+            openGallery(soundGallery);
+        });
 
-        const dialRect = anglePickerDial.getBoundingClientRect();
-        const centerX = dialRect.left + dialRect.width / 2;
-        const centerY = dialRect.top + dialRect.height / 2;
-        const pointer = e.touches ? e.touches[0] : e;
-        const deltaX = pointer.clientX - centerX;
-        const deltaY = pointer.clientY - centerY;
+        document.getElementById('close-sprite-gallery-button').addEventListener('click', () => spriteGallery.classList.remove('visible'));
+        document.getElementById('close-gallery-button').addEventListener('click', () => backgroundGallery.classList.remove('visible'));
+        closeSoundGalleryButton.addEventListener('click', () => soundGallery.classList.remove('visible'));
+
+        document.getElementById('sprite-thumbnails-grid').addEventListener('click', handleSpriteGallerySelection);
+        document.getElementById('thumbnails-grid').addEventListener('click', handleGallerySelection);
+        backdropsList.addEventListener('click', handleBackdropSelection);
         
-        let degrees = Math.atan2(deltaX, -deltaY) * (180 / Math.PI);
-        if (degrees < 0) degrees += 360;
-        degrees = Math.round(degrees);
-        if (degrees === 360) degrees = 0;
+        const spriteUploadInput = document.getElementById('sprite-upload-input');
+        const uploadSpriteBtn = document.getElementById('upload-sprite-header-button');
+        uploadSpriteBtn.addEventListener('click', () => spriteUploadInput.click());
+        spriteUploadInput.addEventListener('change', (e) => {
+             const file = e.target.files[0];
+             if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const name = file.name.split('.')[0];
+                    createNewSprite(name, event.target.result);
+                    spriteGallery.classList.remove('visible');
+                };
+                reader.readAsDataURL(file);
+             }
+             e.target.value = null;
+        });
 
-        sprite.direction = degrees;
-        propDirection.value = degrees;
-        anglePickerHandle.style.transform = `rotate(${degrees - 90}deg)`;
-        window.refreshSprite(sprite);
-    };
+        const backdropUploadInput = document.getElementById('backdrop-upload-input');
+        const uploadBackdropBtn = document.getElementById('upload-backdrop-header-button');
+        uploadBackdropBtn.addEventListener('click', () => backdropUploadInput.click());
+        backdropUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if(file) {
+                 const reader = new FileReader();
+                 reader.onload = (event) => {
+                    const newCard = createBackdropCard(event.target.result);
+                    window.switchBackdrop(event.target.result);
+                    backgroundGallery.classList.remove('visible');
+                 };
+                 reader.readAsDataURL(file);
+            }
+            e.target.value = null;
+        });
+    }
 
-    anglePickerDial.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        isDraggingAngle = true;
-        updateAngleFromEvent(e);
-    });
-    anglePickerDial.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        isDraggingAngle = true;
-        updateAngleFromEvent(e);
-    });
-
-    document.addEventListener('mousemove', (e) => { if (isDraggingAngle) updateAngleFromEvent(e); });
-    document.addEventListener('touchmove', (e) => { if (isDraggingAngle) updateAngleFromEvent(e); });
-    document.addEventListener('mouseup', () => { isDraggingAngle = false; });
-    document.addEventListener('touchend', () => { isDraggingAngle = false; });
-    document.addEventListener('click', (e) => {
-        if (!anglePickerWidget.contains(e.target) && e.target !== propDirection) {
-            anglePickerWidget.style.display = 'none';
-        }
-    });
-
-    // --- GIF Animation Logic ---
     async function loadGifData(sprite) {
         try {
             const response = await fetch(sprite.imageUrl);
             const arrayBuffer = await response.arrayBuffer();
-            const gifData = parseGIF(arrayBuffer);
+            const parsedGif = parseGIF(arrayBuffer);
 
             sprite.animation = {
-                width: gifData.width,
-                height: gifData.height,
-                frames: gifData.frames,
-                loopCount: gifData.loopCount,
+                frames: parsedGif.frames,
+                width: parsedGif.width,
+                height: parsedGif.height,
+                currentFrame: 0,
                 isPlaying: false,
                 previewIsPlaying: false,
-                currentFrame: 0,
                 timeSinceLastFrame: 0,
-                patchCanvas: document.createElement('canvas'),
+                imageData: null, 
             };
-            sprite.animation.patchCanvas.width = gifData.width;
-            sprite.animation.patchCanvas.height = gifData.height;
-
-            const wrapper = document.getElementById(sprite.id);
-            if (wrapper) {
-                const img = wrapper.querySelector('img');
-                const canvas = wrapper.querySelector('canvas');
-                img.classList.add('hidden');
-                canvas.classList.remove('hidden');
-                canvas.width = gifData.width;
-                canvas.height = gifData.height;
-            }
             
-            drawGifFrame(sprite);
-            updatePropertiesPanel();
-
-        } catch (e) {
-            console.error(`Failed to load or parse GIF for sprite ${sprite.name}:`, e);
+            const canvas = document.querySelector(`#container-${sprite.id} canvas`);
+            if (canvas) {
+                canvas.classList.remove('hidden');
+                canvas.width = parsedGif.width;
+                canvas.height = parsedGif.height;
+                drawGifFrame(sprite);
+            }
+        } catch(e) {
+            console.error("Failed to load or parse GIF:", sprite.imageUrl, e);
             sprite.isGif = false;
         }
     }
-    
+
     function drawGifFrame(sprite) {
-        if (!sprite.isGif || !sprite.animation) return;
+        if (!sprite || !sprite.animation) return;
+        const { frames, width, height, currentFrame } = sprite.animation;
+        const frame = frames[currentFrame];
         
-        const frame = sprite.animation.frames[sprite.animation.currentFrame];
-        if (!frame) return;
+        const canvas = document.querySelector(`#container-${sprite.id} canvas`);
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
         
-        const { width, height, patchCanvas } = sprite.animation;
-        const patchCtx = patchCanvas.getContext('2d');
-        
-        if (sprite.animation.currentFrame === 0 || frame.disposalMethod === 2) {
-             patchCtx.clearRect(0, 0, width, height);
+        if (currentFrame === 0 || frame.disposalMethod === 2) {
+             ctx.clearRect(0, 0, width, height);
         }
 
-        const imageData = patchCtx.createImageData(frame.w, frame.h);
-        const transparentIndex = frame.transparentColorIndex;
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = frame.w;
+        tempCanvas.height = frame.h;
+        const tempCtx = tempCanvas.getContext('2d');
+        const frameImageData = tempCtx.createImageData(frame.w, frame.h);
+        const frameData = frameImageData.data;
+        const colorTable = frame.colorTable;
 
-        frame.pixelIndices.forEach((pixel, i) => {
-            if (pixel !== transparentIndex) {
-                const color = frame.colorTable[pixel];
-                if (color) {
-                    imageData.data[i * 4 + 0] = color[0];
-                    imageData.data[i * 4 + 1] = color[1];
-                    imageData.data[i * 4 + 2] = color[2];
-                    imageData.data[i * 4 + 3] = 255; // Opaque
+        frame.pixelIndices.forEach((pixelIndex, i) => {
+            if (pixelIndex !== frame.transparentColorIndex) {
+                const color = colorTable[pixelIndex];
+                frameData[i * 4] = color[0];
+                frameData[i * 4 + 1] = color[1];
+                frameData[i * 4 + 2] = color[2];
+                frameData[i * 4 + 3] = 255;
+            }
+        });
+        tempCtx.putImageData(frameImageData, 0, 0);
+        ctx.drawImage(tempCanvas, frame.left, frame.top);
+    }
+    
+    function createSoundCard(sound) {
+        const card = document.createElement('div');
+        card.className = 'sound-card';
+        card.dataset.url = sound.url;
+        card.innerHTML = `
+            <div class="delete-button">X</div>
+            <svg class="sound-card-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 2a.75.75 0 01.75.75v14.5a.75.75 0 01-1.5 0V2.75A.75.75 0 0110 2zM4.5 5.25a.75.75 0 000 1.5h1.014a2.5 2.5 0 012.236 2.236v1.014a.75.75 0 001.5 0V9.014A2.5 2.5 0 0111.986 6.75h1.014a.75.75 0 000-1.5H4.5z" />
+            </svg>
+            <div class="sound-card-name" title="${sound.name}">${sound.name}</div>
+        `;
+        
+        card.addEventListener('click', () => {
+             if (currentPreviewAudio) {
+                currentPreviewAudio.pause();
+                if (currentPreviewAudio.src === sound.url) {
+                    currentPreviewAudio = null;
+                    return;
                 }
             }
-            // Pixels with the transparent index will be left as rgba(0,0,0,0) by default
+            currentPreviewAudio = new Audio(sound.url);
+            currentPreviewAudio.play();
         });
         
-        patchCtx.putImageData(imageData, frame.left, frame.top);
+        card.querySelector('.delete-button').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const sprite = getActiveSprite();
+            if (sprite) {
+                sprite.sounds = sprite.sounds.filter(s => s.url !== sound.url);
+                renderSpriteSounds(sprite);
+                workspace.refreshToolboxSelection();
+            }
+        });
         
-        const wrapper = document.getElementById(sprite.id);
-        if (wrapper) {
-            const canvas = wrapper.querySelector('canvas');
-            if (canvas) {
-                const ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(patchCanvas, 0, 0);
-            }
-        }
-    }
-
-    function updateGifAnimations(deltaTime) {
-        Object.values(sprites).forEach(sprite => {
-            if (sprite.isGif && sprite.animation && sprite.animation.frames.length > 0 && (sprite.animation.isPlaying || sprite.animation.previewIsPlaying)) {
-                sprite.animation.timeSinceLastFrame += deltaTime;
-                const currentFrameData = sprite.animation.frames[sprite.animation.currentFrame];
-                const requiredDelay = (currentFrameData.delay * 10) / sprite.gifSpeed;
-
-                if (sprite.animation.timeSinceLastFrame >= requiredDelay) {
-                    sprite.animation.currentFrame = (sprite.animation.currentFrame + 1) % sprite.animation.frames.length;
-                    sprite.animation.timeSinceLastFrame = 0;
-                    drawGifFrame(sprite);
-                }
-            }
-        });
-    }
-    
-    // --- Main Game Loop / Tick ---
-    function tick(timestamp) {
-        if (!lastTimestamp) {
-            lastTimestamp = timestamp;
-        }
-        // Calculate delta time, with a fallback for the first frame or pauses
-        const deltaTime = (timestamp - lastTimestamp) || (1000 / 60);
-        lastTimestamp = timestamp;
-        // Cap delta time to prevent huge jumps if the tab was inactive
-        window.frameDeltaTime = Math.min(deltaTime, 100);
-
-        if (scriptRunner) {
-            scriptRunner.tick();
-        }
-        
-        // GIF animations are updated based on real time for smoothness
-        updateGifAnimations(window.frameDeltaTime);
-
-        requestAnimationFrame(tick);
-    }
-    
-    
-    // --- NEW SOUND SYSTEM (INTEGRATED) ---
-
-    function populateSoundGallery() {
-        if (soundGalleryGrid.childElementCount > 0) return;
-
-        const allSounds = [
-            { name: "Boat Start", url: "https://codejredu.github.io/test/assets/sound/BoatStart.mp3" },
-            { name: "Car Door", url: "https://codejredu.github.io/test/assets/sound/CARDOOR.mp3" },
-            { name: "Elevator Ding", url: "https://codejredu.github.io/test/assets/sound/ElevatorDing.mp3" },
-            { name: "Water Emptying", url: "https://codejredu.github.io/test/assets/sound/WaterEmptying.mp3" },
-            { name: "Water Vole Diving", url: "https://codejredu.github.io/test/assets/sound/WaterVole.mp3" },
-            { name: "Air Land", url: "https://codejredu.github.io/test/assets/sound/airland.mp3" },
-            { name: "Airplane Cessna", url: "https://codejredu.github.io/test/assets/sound/airplanecessna.mp3" },
-            { name: "Airplane F15", url: "https://codejredu.github.io/test/assets/sound/airplanef15.mp3" },
-            { name: "Animal Howl", url: "https://codejredu.github.io/test/assets/sound/animals.mp3" },
-            { name: "Crowd", url: "https://codejredu.github.io/test/assets/sound/crowds.mp3" },
-            { name: "Bird Call", url: "https://codejredu.github.io/test/assets/sound/double.mp3" },
-            { name: "Partridge", url: "https://codejredu.github.io/test/assets/sound/grey.mp3" },
-            { name: "Pygmy Shrew", url: "https://codejredu.github.io/test/assets/sound/pygmy.mp3" },
-            { name: "School", url: "https://codejredu.github.io/test/assets/sound/school.mp3" },
-        ];
-
-        allSounds.forEach(sound => {
-            const thumb = document.createElement('div');
-            thumb.className = 'sound-thumbnail';
-            thumb.dataset.url = sound.url;
-            thumb.dataset.name = sound.name;
-            thumb.innerHTML = `
-                <input type="checkbox" class="sound-thumbnail-checkbox">
-                <svg class="sound-thumbnail-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
-                </svg>
-                <span class="sound-thumbnail-name">${sound.name}</span>
-            `;
-            thumb.addEventListener('click', (e) => {
-                if (e.target.type === 'checkbox') {
-                    // Handle checkbox click
-                    if (e.target.checked) {
-                        selectedSoundsForAdd.add(sound.url);
-                        thumb.classList.add('selected-for-add');
-                    } else {
-                        selectedSoundsForAdd.delete(sound.url);
-                        thumb.classList.remove('selected-for-add');
-                    }
-                } else {
-                    // Handle thumbnail click (play preview)
-                    if (currentPreviewAudio && !currentPreviewAudio.paused) {
-                        currentPreviewAudio.pause();
-                        if (currentPreviewAudio.src === sound.url) {
-                            currentPreviewAudio = null;
-                            return;
-                        }
-                    }
-                    currentPreviewAudio = new Audio(sound.url);
-                    currentPreviewAudio.play();
-                }
-            });
-            soundGalleryGrid.appendChild(thumb);
-        });
-    }
-
-    function addSoundsToSprite(sprite, sounds) {
-        sounds.forEach(sound => {
-            if (!sprite.sounds.some(s => s.url === sound.url)) {
-                sprite.sounds.push(sound);
-            }
-        });
-        renderSpriteSounds(sprite);
-        workspace.refreshToolboxSelection();
-    }
-    
-    function deleteSoundFromSprite(sprite, soundUrl) {
-        sprite.sounds = sprite.sounds.filter(s => s.url !== soundUrl);
-        renderSpriteSounds(sprite);
-        workspace.refreshToolboxSelection();
+        return card;
     }
 
     function renderSpriteSounds(sprite) {
         soundsList.innerHTML = '';
-        if (!sprite || !sprite.sounds) return;
-
-        sprite.sounds.forEach(sound => {
-            const card = document.createElement('div');
-            card.className = 'sound-card';
-            card.dataset.url = sound.url;
-            card.innerHTML = `
-                <div class="delete-button">X</div>
-                <svg class="sound-card-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-                </svg>
-                <span class="sound-card-name">${sound.name}</span>
-            `;
-            card.querySelector('.delete-button').addEventListener('click', (e) => {
-                e.stopPropagation();
-                deleteSoundFromSprite(sprite, sound.url);
+        if (sprite && sprite.sounds) {
+            sprite.sounds.forEach(sound => {
+                soundsList.appendChild(createSoundCard(sound));
             });
-            card.addEventListener('click', () => {
-                const audio = new Audio(sound.url);
-                audio.play();
-            });
-            soundsList.appendChild(card);
+        }
+    }
+    
+    function updateSoundGallerySelection() {
+        soundGalleryGrid.querySelectorAll('.sound-thumbnail').forEach(thumb => {
+            const checkbox = thumb.querySelector('.sound-thumbnail-checkbox');
+            const isSelected = selectedSoundsForAdd.has(thumb.dataset.url);
+            checkbox.checked = isSelected;
+            thumb.classList.toggle('selected-for-add', isSelected);
         });
     }
 
-    addSoundButton.addEventListener('click', () => {
-        populateSoundGallery();
-        openGallery(soundGallery);
-        selectedSoundsForAdd.clear();
-        soundGalleryGrid.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-        soundGalleryGrid.querySelectorAll('.sound-thumbnail').forEach(t => t.classList.remove('selected-for-add'));
-    });
-    
-    closeSoundGalleryButton.addEventListener('click', () => {
-        soundGallery.classList.remove('visible');
-        if (currentPreviewAudio) {
-            currentPreviewAudio.pause();
-            currentPreviewAudio = null;
-        }
-    });
-
-    addSelectedSoundsButton.addEventListener('click', () => {
+    function handleSoundUpload(files) {
+        if (!files.length) return;
         const sprite = getActiveSprite();
         if (!sprite) return;
 
-        const soundsToAdd = [];
-        selectedSoundsForAdd.forEach(url => {
-            const thumb = soundGalleryGrid.querySelector(`.sound-thumbnail[data-url="${url}"]`);
-            if (thumb) {
-                soundsToAdd.push({ name: thumb.dataset.name, url: url });
-            }
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const name = file.name.replace(/\.[^/.]+$/, "");
+                const url = e.target.result;
+                if (!sprite.sounds.some(s => s.name === name)) {
+                    sprite.sounds.push({ name, url });
+                }
+                renderSpriteSounds(sprite);
+                workspace.refreshToolboxSelection();
+            };
+            reader.readAsDataURL(file);
         });
-
-        addSoundsToSprite(sprite, soundsToAdd);
-        soundGallery.classList.remove('visible');
-    });
-
-    // --- Sound Recorder Logic ---
-
-    function showRecorderMessage(msg, isError = true) {
-        recorderMessage.textContent = msg;
-        recorderMessage.className = `w-full text-center p-3 rounded-lg border ${isError ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`;
-        recorderMessage.classList.remove('hidden');
+        soundUploadInput.value = '';
     }
     
-    function hideRecorderMessage() {
-         recorderMessage.classList.add('hidden');
+    function openSoundRecorder() {
+        resetRecorderState();
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                mediaStream = stream;
+                soundRecorderModal.classList.remove('hidden');
+            })
+            .catch(err => {
+                showRecorderError("Microphone access denied. Please allow microphone access in your browser settings.");
+                console.error("Microphone access error:", err);
+            });
+    }
+    
+    function closeSoundRecorder() {
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(track => track.stop());
+            mediaStream = null;
+        }
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+        }
+        soundRecorderModal.classList.add('hidden');
     }
 
-    async function startRecording() {
-        hideRecorderMessage();
-        try {
-            mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(mediaStream);
-            audioChunks = [];
-            
-            mediaRecorder.ondataavailable = event => {
-                audioChunks.push(event.data);
-            };
+    function showRecorderError(message) {
+        recorderMessage.textContent = message;
+        recorderMessage.classList.remove('hidden');
+        recorderUIContent.classList.add('hidden');
+    }
+    
+    function resetRecorderState() {
+        recorderMessage.classList.add('hidden');
+        recorderUIContent.classList.remove('hidden');
+        recorderRecordBtn.classList.remove('hidden');
+        recorderStopBtn.classList.add('hidden');
+        recorderRerecordBtn.classList.add('hidden');
+        recorderSaveBtn.classList.add('hidden');
+        recorderPreviewContainer.classList.add('hidden');
+        recorderTimer.textContent = '0.0 / 15.0';
+        recorderVisualizer.classList.remove('is-recording');
+        if(recorderTimerInterval) clearInterval(recorderTimerInterval);
+        audioChunks = [];
+        recordedBlob = null;
+    }
 
-            mediaRecorder.onstop = () => {
-                recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                const audioUrl = URL.createObjectURL(recordedBlob);
-                recorderAudioPreview.src = audioUrl;
-                updateRecorderUI('preview');
-                mediaStream.getTracks().forEach(track => track.stop());
-            };
-
-            mediaRecorder.start();
-            updateRecorderUI('recording');
-            
-            let seconds = 0;
-            recorderTimer.textContent = `0.0 / 15.0`;
-            recorderTimerInterval = setInterval(() => {
-                seconds += 0.1;
-                recorderTimer.textContent = `${seconds.toFixed(1)} / 15.0`;
-                if (seconds >= 15) {
-                    stopRecording();
-                }
-            }, 100);
-
-        } catch (err) {
-            console.error("Error starting recording:", err);
-            showRecorderMessage('Cannot access microphone. Please check permissions.');
-            updateRecorderUI('idle');
-        }
+    function startRecording() {
+        mediaRecorder = new MediaRecorder(mediaStream);
+        mediaRecorder.start();
+        
+        recorderVisualizer.classList.add('is-recording');
+        recorderRecordBtn.classList.add('hidden');
+        recorderStopBtn.classList.remove('hidden');
+        
+        let startTime = Date.now();
+        recorderTimerInterval = setInterval(() => {
+            const seconds = ((Date.now() - startTime) / 1000);
+            recorderTimer.textContent = `${seconds.toFixed(1)} / 15.0`;
+            if (seconds >= 15) stopRecording();
+        }, 100);
+        
+        mediaRecorder.addEventListener("dataavailable", event => {
+            audioChunks.push(event.data);
+        });
+        
+        mediaRecorder.addEventListener("stop", () => {
+             recordedBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+             const audioUrl = URL.createObjectURL(recordedBlob);
+             recorderAudioPreview.src = audioUrl;
+             
+             recorderStopBtn.classList.add('hidden');
+             recorderRerecordBtn.classList.remove('hidden');
+             recorderSaveBtn.classList.remove('hidden');
+             recorderPreviewContainer.classList.remove('hidden');
+             recorderSoundName.value = `My Sound ${getActiveSprite()?.sounds.length + 1 || 1}`;
+        });
     }
     
     function stopRecording() {
         if (mediaRecorder && mediaRecorder.state === 'recording') {
             mediaRecorder.stop();
         }
-        clearInterval(recorderTimerInterval);
+        recorderVisualizer.classList.remove('is-recording');
+        if(recorderTimerInterval) clearInterval(recorderTimerInterval);
     }
     
     function saveRecording() {
         const sprite = getActiveSprite();
-        const soundName = recorderSoundName.value.trim() || `Recording ${sprite.sounds.length + 1}`;
-        if (recordedBlob && sprite) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const dataUrl = event.target.result;
-                addSoundsToSprite(sprite, [{ name: soundName, url: dataUrl }]);
-                soundRecorderModal.classList.add('hidden');
-                updateRecorderUI('idle');
-            };
-            reader.readAsDataURL(recordedBlob);
-        }
-    }
-
-    function updateRecorderUI(state) {
-        recorderRecordBtn.classList.toggle('hidden', state !== 'idle');
-        recorderStopBtn.classList.toggle('hidden', state !== 'recording');
-        recorderRerecordBtn.classList.toggle('hidden', state !== 'preview');
-        recorderSaveBtn.classList.toggle('hidden', state !== 'preview');
-        recorderPreviewContainer.classList.toggle('hidden', state !== 'preview');
-        recorderVisualizer.classList.toggle('is-recording', state === 'recording');
+        if (!sprite || !recordedBlob) return;
         
-        if (state === 'idle') {
-            recorderTimer.textContent = '0.0 / 15.0';
-            recorderSoundName.value = '';
-        }
-    }
-    
-    recordSoundHeaderButton.addEventListener('click', () => {
-        if(!getActiveSprite()) {
-            alert("Please select a sprite before recording a sound.");
-            return;
-        }
-        soundRecorderModal.classList.remove('hidden');
-        updateRecorderUI('idle');
-        hideRecorderMessage();
-    });
-
-    recorderCloseBtn.addEventListener('click', () => {
-        stopRecording();
-        if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
-        soundRecorderModal.classList.add('hidden');
-    });
-
-    recorderRecordBtn.addEventListener('click', startRecording);
-    recorderStopBtn.addEventListener('click', stopRecording);
-    recorderRerecordBtn.addEventListener('click', () => updateRecorderUI('idle'));
-    recorderSaveBtn.addEventListener('click', saveRecording);
-
-
-    // --- File Upload Logic ---
-    function handleFileUpload(file, type) {
-        if (!file) return;
-
+        const name = recorderSoundName.value.trim() || 'Recorded Sound';
         const reader = new FileReader();
-        reader.onload = (e) => {
-            const dataUrl = e.target.result;
-            const name = file.name.split('.')[0];
-            
-            if (type === 'sprite') {
-                createNewSprite(name, dataUrl, 0, 0);
-            } else if (type === 'backdrop') {
-                const newCard = createBackdropCard(dataUrl);
-                window.switchBackdrop(dataUrl);
-            } else if (type === 'sound') {
-                const sprite = getActiveSprite();
-                if (sprite) {
-                    addSoundsToSprite(sprite, [{ name: name, url: dataUrl }]);
-                } else {
-                     alert("Please select a sprite before uploading a sound.");
-                }
+        reader.onload = function(event) {
+            const url = event.target.result;
+            if (!sprite.sounds.some(s => s.name === name)) {
+                sprite.sounds.push({ name, url });
+                renderSpriteSounds(sprite);
+                workspace.refreshToolboxSelection();
             }
+            closeSoundRecorder();
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(recordedBlob);
     }
     
-    // --- Gallery Initialization and Listeners ---
-    function initGalleries() {
-        document.getElementById('add-sprite-button').addEventListener('click', () => openGallery(spriteGallery));
-        document.getElementById('upload-sprite-header-button').addEventListener('click', () => document.getElementById('sprite-upload-input').click());
-        document.getElementById('sprite-upload-input').addEventListener('change', (e) => handleFileUpload(e.target.files[0], 'sprite'));
-        document.getElementById('close-sprite-gallery-button').addEventListener('click', () => spriteGallery.classList.remove('visible'));
-        document.getElementById('sprite-thumbnails-grid').addEventListener('click', handleSpriteGallerySelection);
-        
-        document.getElementById('create-sprite-header-button').addEventListener('click', () => {
-            if (window.characterCreator) {
-                window.characterCreator.open();
+    function setupSoundSystem() {
+        const soundFiles = [ 'boing', 'clap', 'drip', 'drum', 'fart', 'meow', 'pop', 'snap', 'ting', 'woosh' ];
+        soundFiles.forEach(name => {
+            const url = `https://codejredu.github.io/test/assets/sounds/${name}.mp3`;
+            const thumb = document.createElement('div');
+            thumb.className = 'sound-thumbnail';
+            thumb.dataset.url = url;
+            thumb.dataset.name = name;
+            thumb.innerHTML = `
+                <input type="checkbox" class="sound-thumbnail-checkbox">
+                <svg class="sound-thumbnail-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+                </svg>
+                <div class="sound-thumbnail-name">${name}</div>
+            `;
+            soundGalleryGrid.appendChild(thumb);
+        });
+
+        soundGalleryGrid.addEventListener('click', (e) => {
+            const thumb = e.target.closest('.sound-thumbnail');
+            if (!thumb) return;
+            const checkbox = thumb.querySelector('.sound-thumbnail-checkbox');
+            if (e.target !== checkbox) {
+                checkbox.checked = !checkbox.checked;
+            }
+            
+            const url = thumb.dataset.url;
+            if (checkbox.checked) {
+                selectedSoundsForAdd.add(url);
+            } else {
+                selectedSoundsForAdd.delete(url);
+            }
+            updateSoundGallerySelection();
+        });
+
+        addSelectedSoundsButton.addEventListener('click', () => {
+            const sprite = getActiveSprite();
+            if (!sprite) return;
+            selectedSoundsForAdd.forEach(url => {
+                 if (!sprite.sounds.some(s => s.url === url)) {
+                    const name = soundGalleryGrid.querySelector(`[data-url="${url}"]`).dataset.name;
+                    sprite.sounds.push({ name, url });
+                 }
+            });
+            renderSpriteSounds(sprite);
+            workspace.refreshToolboxSelection();
+            soundGallery.classList.remove('visible');
+        });
+
+        uploadSoundHeaderButton.addEventListener('click', () => soundUploadInput.click());
+        soundUploadInput.addEventListener('change', (e) => handleSoundUpload(e.target.files));
+
+        recordSoundHeaderButton.addEventListener('click', openSoundRecorder);
+        recorderRecordBtn.addEventListener('click', startRecording);
+        recorderStopBtn.addEventListener('click', stopRecording);
+        recorderCloseBtn.addEventListener('click', closeSoundRecorder);
+        recorderRerecordBtn.addEventListener('click', resetRecorderState);
+        recorderSaveBtn.addEventListener('click', saveRecording);
+    }
+
+    function gameLoop(timestamp) {
+        if (!lastTimestamp) {
+            lastTimestamp = timestamp;
+        }
+        window.frameDeltaTime = timestamp - lastTimestamp;
+        lastTimestamp = timestamp;
+
+        if (scriptRunner) {
+            scriptRunner.tick();
+        }
+
+        Object.values(sprites).forEach(sprite => {
+            if (sprite.isGif && sprite.animation && (sprite.animation.isPlaying || sprite.animation.previewIsPlaying)) {
+                sprite.animation.timeSinceLastFrame += window.frameDeltaTime;
+                const baseDelay = sprite.animation.frames[sprite.animation.currentFrame].delay * 10;
+                const effectiveSpeed = sprite.animation.isPlaying ? 1.0 : (sprite.gifSpeed || 1.0);
+                const frameDelay = baseDelay / effectiveSpeed;
+
+                if (sprite.animation.timeSinceLastFrame >= frameDelay) {
+                    sprite.animation.timeSinceLastFrame = 0;
+                    sprite.animation.currentFrame = (sprite.animation.currentFrame + 1) % sprite.animation.frames.length;
+                    drawGifFrame(sprite);
+                }
             }
         });
 
-        document.getElementById('add-backdrop-button').addEventListener('click', () => openGallery(backgroundGallery));
-        document.getElementById('upload-backdrop-header-button').addEventListener('click', () => document.getElementById('backdrop-upload-input').click());
-        document.getElementById('backdrop-upload-input').addEventListener('change', (e) => handleFileUpload(e.target.files[0], 'backdrop'));
-        document.getElementById('close-gallery-button').addEventListener('click', () => backgroundGallery.classList.remove('visible'));
-        backdropsList.addEventListener('click', handleBackdropSelection);
-        document.getElementById('thumbnails-grid').addEventListener('click', handleGallerySelection);
-        
-        uploadSoundHeaderButton.addEventListener('click', () => soundUploadInput.click());
-        soundUploadInput.addEventListener('change', (e) => handleFileUpload(e.target.files[0], 'sound'));
+        requestAnimationFrame(gameLoop);
     }
 
-    // --- Character Creator Integration ---
-    window.characterCreator = initCharacterCreator({
-        getSprite: (spriteId) => sprites[spriteId],
-        onSave: ({ name, dataUrl, characterData, editingSpriteId }) => {
-            if (editingSpriteId && sprites[editingSpriteId]) {
-                // Update existing sprite
-                const sprite = sprites[editingSpriteId];
-                sprite.imageUrl = dataUrl;
-                sprite.characterData = characterData;
-                
-                // Update on stage
-                const wrapper = document.getElementById(sprite.id);
-                if(wrapper) wrapper.querySelector('img').src = dataUrl;
+    // --- Initial Setup ---
+    function init() {
+        setupPropertiesPanelListeners();
+        setupGalleryListeners();
+        setupSoundSystem();
+        
+        window.characterCreator = initCharacterCreator({
+            onSave: ({ name, dataUrl, characterData, editingSpriteId }) => {
+                if (editingSpriteId) {
+                    const sprite = sprites[editingSpriteId];
+                    if (sprite) {
+                        sprite.imageUrl = dataUrl;
+                        sprite.characterData = characterData;
+                        
+                        const card = document.querySelector(`.sprite-card[data-sprite-id="${editingSpriteId}"] img`);
+                        if (card) card.src = dataUrl;
+                        
+                        const stageImg = document.querySelector(`#container-${editingSpriteId} img`);
+                        if (stageImg) stageImg.src = dataUrl;
+                    }
+                } else {
+                    createNewSprite(name || 'Character', dataUrl, 0, 0, true, characterData);
+                }
+            },
+            getSprite: (id) => sprites[id]
+        });
 
-                // Update card
-                const card = document.querySelector(`.sprite-card[data-sprite-id="${sprite.id}"]`);
-                if(card) card.querySelector('img').src = dataUrl;
-            } else {
-                 // Create new sprite
-                const newName = name || `Character ${Object.keys(sprites).length + 1}`;
-                createNewSprite(newName, dataUrl, 0, 0, true, characterData);
-            }
-        }
-    });
+        document.getElementById('create-sprite-header-button').addEventListener('click', () => {
+            window.characterCreator.open();
+        });
 
-    // --- Layer Control Logic ---
-    window.changeSpriteLayer = (sprite, action) => {
-        if (!sprite) return;
-        const sortedSprites = Object.values(sprites).sort((a, b) => (a.zIndex || 10) - (b.zIndex || 10));
-        const currentIndex = sortedSprites.findIndex(s => s.id === sprite.id);
-        if (currentIndex === -1) return;
-
-        switch (action) {
-            case 'FRONT':
-                if (currentIndex < sortedSprites.length - 1) {
-                    const topZ = sortedSprites[sortedSprites.length - 1].zIndex;
-                    sprite.zIndex = topZ + 1;
-                    window.refreshSprite(sprite);
-                }
-                break;
-            case 'BACK':
-                if (currentIndex > 0) {
-                    const bottomZ = sortedSprites[0].zIndex;
-                    sprite.zIndex = bottomZ - 1;
-                    window.refreshSprite(sprite);
-                }
-                break;
-            case 'FORWARD':
-                if (currentIndex < sortedSprites.length - 1) {
-                    const nextSprite = sortedSprites[currentIndex + 1];
-                    [sprite.zIndex, nextSprite.zIndex] = [nextSprite.zIndex, sprite.zIndex];
-                    window.refreshSprite(sprite);
-                    window.refreshSprite(nextSprite);
-                }
-                break;
-            case 'BACKWARD':
-                if (currentIndex > 0) {
-                    const prevSprite = sortedSprites[currentIndex - 1];
-                    [sprite.zIndex, prevSprite.zIndex] = [prevSprite.zIndex, sprite.zIndex];
-                    window.refreshSprite(sprite);
-                    window.refreshSprite(prevSprite);
-                }
-                break;
-        }
-    };
+        stopAllScripts();
+        createDefaultBackdrop();
+        createDefaultSprite();
+        gameLoop();
+    }
     
-    // --- Add unload listener ---
-    window.addEventListener('beforeunload', (event) => {
-        // Standard way to trigger the browser's own confirmation dialog.
-        event.preventDefault(); // Required for some browsers.
-        event.returnValue = 'Are you sure? Changes you made may not be saved.'; // Required for legacy browsers.
-    });
+    init();
 
-
-    // --- App Initialization ---
-    setupPropertiesPanelListeners();
-    initGalleries();
-    createDefaultBackdrop();
-    createDefaultSprite();
-    requestAnimationFrame(tick);
 });

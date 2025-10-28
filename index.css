@@ -1,4 +1,5 @@
 
+
 /* START OF FILE index.css */
 
 
@@ -1303,5 +1304,41 @@
 
         #toggle-grid-button.active:hover {
             background-color: #d97706; /* Darker amber on hover */
+        }
+        
+        /* Panel Scroll Controls */
+        #panel-scroll-controls {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .panel-scroll-button {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #f59e0b;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+
+        .panel-scroll-button:hover {
+            background-color: #d97706;
+            transform: scale(1.05);
+        }
+
+        .panel-scroll-button:active {
+            transform: scale(0.98);
         }
 /* END OF FILE index.css */
