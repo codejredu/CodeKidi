@@ -347,8 +347,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeSpriteId = null;
     let executionCancelled = false;
     let isLoadingProject = false;
-    let justDragged = false;
-    let dragStartX, dragStartY;
     let collisionState = new Set();
     let scriptRunner = null;
     let lastTimestamp = 0;
@@ -824,13 +822,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         const wrapper = spriteContainer.querySelector('.sprite-wrapper');
-        wrapper.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (justDragged) return;
-            handleSpriteClick(id);
-        });
-        wrapper.addEventListener('mousedown', (e) => startDrag(e, id));
-        wrapper.addEventListener('touchstart', (e) => startDrag(e, id));
+        wrapper.addEventListener('mousedown', (e) => handleSpriteMouseDown(e, id));
+        wrapper.addEventListener('touchstart', (e) => handleSpriteMouseDown(e, id), { passive: false });
+
 
         setActiveSprite(id);
         updateSpriteAppearance(id);
@@ -952,42 +946,38 @@ document.addEventListener('DOMContentLoaded', () => {
         log(`Active sprite is now: ${newSprite.name}`);
     };
 
-    let isDragging = false;
-    let dragSpriteId = null;
-    let initialMouseX, initialMouseY, initialSpriteX, initialSpriteY;
-
     const getPointerPosition = (e) => {
         if (e.touches && e.touches.length > 0) {
             return { x: e.touches[0].clientX, y: e.touches[0].clientY };
         }
         return { x: e.clientX, y: e.clientY };
     };
-    
-    const startDrag = (e, id) => {
-        e.preventDefault();
-        isDragging = true;
-        dragSpriteId = id;
-        const spriteData = sprites[dragSpriteId];
 
-        setActiveSprite(id);
-        const { x, y } = getPointerPosition(e);
-        dragStartX = x;
-        dragStartY = y;
-        initialMouseX = x;
-        initialMouseY = y;
-        initialSpriteX = spriteData.x;
-        initialSpriteY = spriteData.y;
-        document.querySelector(`#container-${dragSpriteId}`).style.transition = 'none';
-        log('Sprite picked up for dragging.');
-    };
+    function handleSpriteMouseDown(startEvent, spriteId) {
+        startEvent.preventDefault();
+        const spriteData = sprites[spriteId];
+        if (!spriteData) return;
 
-    const drag = (e) => {
-        if (isDragging && dragSpriteId) {
-            const spriteData = sprites[dragSpriteId];
-            const { x, y } = getPointerPosition(e);
-            const deltaX = x - initialMouseX;
-            const deltaY = y - initialMouseY;
-            
+        // State for this specific interaction, captured in a closure.
+        let wasDragged = false;
+        const { x: startMouseX, y: startMouseY } = getPointerPosition(startEvent);
+        const initialSpriteX = spriteData.x;
+        const initialSpriteY = spriteData.y;
+
+        setActiveSprite(spriteId);
+        document.querySelector(`#container-${spriteId}`).style.transition = 'none';
+
+        function onMouseMove(moveEvent) {
+            const { x: currentX, y: currentY } = getPointerPosition(moveEvent);
+
+            // Check if it qualifies as a drag
+            const deltaX = currentX - startMouseX;
+            const deltaY = currentY - startMouseY;
+            if (!wasDragged && (deltaX * deltaX + deltaY * deltaY) > 25) { // 5px threshold
+                wasDragged = true;
+            }
+
+            // Update sprite position based on drag
             const rect = stageArea.getBoundingClientRect();
             const scaleX = STAGE_WIDTH / rect.width;
             const scaleY = STAGE_HEIGHT / rect.height;
@@ -997,35 +987,28 @@ document.addEventListener('DOMContentLoaded', () => {
             
             window.refreshSprite(spriteData);
         }
-    };
 
-    const endDrag = (e) => {
-        if (isDragging && dragSpriteId) {
-             const pointer = e.changedTouches ? e.changedTouches[0] : e;
-            const deltaX = pointer.clientX - dragStartX;
-            const deltaY = pointer.clientY - dragStartY;
-            const distance = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
+        function onMouseUp(endEvent) {
+            // Cleanup listeners immediately
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            document.removeEventListener('touchmove', onMouseMove);
+            document.removeEventListener('touchend', onMouseUp);
 
-            if (distance > 5) { // Threshold to differentiate click from drag
-                justDragged = true;
-                setTimeout(() => { justDragged = false; }, 50);
+            // If it was a click (not a drag), check for scripts to run
+            if (!wasDragged) {
+                handleSpriteClick(spriteId);
             } else {
-                justDragged = false;
+                log(`Sprite dragged to new position (x: ${spriteData.x.toFixed(0)}, y: ${spriteData.y.toFixed(0)})`);
             }
-
-            const spriteData = sprites[dragSpriteId];
-            window.refreshSprite(spriteData); // Final update
-            log(`Sprite dragged to new position (x: ${spriteData.x.toFixed(0)}, y: ${spriteData.y.toFixed(0)})`);
         }
-        isDragging = false;
-        dragSpriteId = null;
-    };
 
-    stageArea.addEventListener('mousemove', drag);
-    stageArea.addEventListener('touchmove', drag);
-    document.addEventListener('mouseup', endDrag);
-    document.addEventListener('touchend', endDrag);
-    document.addEventListener('touchcancel', endDrag);
+        // Attach listeners for this drag operation
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+        document.addEventListener('touchmove', onMouseMove);
+        document.addEventListener('touchend', onMouseUp);
+    }
 
     window.addEventListener('resize', () => {
         Object.keys(sprites).forEach(updateSpriteAppearance);
@@ -1370,8 +1353,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const steps = Blockly.JavaScript.valueToCode(block, 'STEPS', Blockly.JavaScript.ORDER_ATOMIC) || '10';
         return `
             if (sprite) {
-                // Normalize movement to a target of 30 FPS for consistent speed
-                const distance = Number(${steps}) * 30 * (window.frameDeltaTime / 1000);
+                const distance = Number(${steps});
                 const radians = sprite.direction * Math.PI / 180;
                 sprite.x += distance * Math.sin(radians);
                 sprite.y += distance * Math.cos(radians);
@@ -1417,8 +1399,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const degrees = Blockly.JavaScript.valueToCode(block, 'DEGREES', Blockly.JavaScript.ORDER_ATOMIC) || '15';
         return `
             if (sprite) {
-                // Normalize rotation to a target of 30 FPS for consistent speed
-                const rotationAmount = Number(${degrees}) * 30 * (window.frameDeltaTime / 1000);
+                const rotationAmount = Number(${degrees});
                 sprite.direction += rotationAmount;
                 window.refreshSprite(sprite);
             }
@@ -1441,8 +1422,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const degrees = Blockly.JavaScript.valueToCode(block, 'DEGREES', Blockly.JavaScript.ORDER_ATOMIC) || '15';
         return `
             if (sprite) {
-                // Normalize rotation to a target of 30 FPS for consistent speed
-                const rotationAmount = Number(${degrees}) * 30 * (window.frameDeltaTime / 1000);
+                const rotationAmount = Number(${degrees});
                 sprite.direction -= rotationAmount;
                 window.refreshSprite(sprite);
             }
@@ -1609,8 +1589,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const size = Blockly.JavaScript.valueToCode(block, 'SIZE', Blockly.JavaScript.ORDER_ATOMIC) || '10';
         return `
             if (sprite) {
-                // Normalize size change to a target of 30 FPS for consistent speed
-                const sizeChange = Number(${size}) * 30 * (window.frameDeltaTime / 1000);
+                const sizeChange = Number(${size});
                 sprite.size += sizeChange;
                 window.refreshSprite(sprite);
                 log(sprite.name + ' grew to size ' + sprite.size);
@@ -1636,8 +1615,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const size = Blockly.JavaScript.valueToCode(block, 'SIZE', Blockly.JavaScript.ORDER_ATOMIC) || '10';
         return `
             if (sprite) {
-                // Normalize size change to a target of 30 FPS for consistent speed
-                const sizeChange = Number(${size}) * 30 * (window.frameDeltaTime / 1000);
+                const sizeChange = Number(${size});
                 sprite.size = Math.max(5, sprite.size - sizeChange); // Don't let size go below 5
                 window.refreshSprite(sprite);
                 log(sprite.name + ' shrunk to size ' + sprite.size);
@@ -2586,48 +2564,50 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        document.getElementById('run-button').classList.add('hidden');
-        document.getElementById('reset-button').classList.remove('hidden');
-        fullscreenRunButton.classList.add('hidden');
-        fullscreenResetButton.classList.remove('hidden');
-        
         saveActiveSpriteWorkspace();
-        scriptRunner = new ScriptRunner(stopAllScripts);
-        
-        log('Script started.');
 
-        Object.values(sprites).forEach(sprite => {
-            if (sprite.isGif && sprite.animation) {
-                sprite.animation.isPlaying = true;
-                sprite.animation.previewIsPlaying = false;
-                sprite.animation.currentFrame = 0;
-                updatePropertiesPanel(); // Update play/pause button state
-            }
-        });
-
-        let scriptsFound = false;
+        const scriptsToRun = [];
         Object.values(sprites).forEach(sprite => {
             if (sprite.workspaceXml) {
                 const tempWorkspace = new Blockly.Workspace();
-                Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(sprite.workspaceXml), tempWorkspace);
-                const topBlocks = tempWorkspace.getTopBlocks(true);
-                const flagClickScripts = topBlocks.filter(block => block.type === 'event_when_flag_clicked');
-                
-                flagClickScripts.forEach(startBlock => {
-                   const generator = createGeneratorForStack(startBlock, sprite);
-                   if (generator) {
-                       scriptRunner.add(generator);
-                       scriptsFound = true;
-                   }
-                });
-                tempWorkspace.dispose();
+                try {
+                    Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(sprite.workspaceXml), tempWorkspace);
+                    const topBlocks = tempWorkspace.getTopBlocks(true);
+                    const flagClickScripts = topBlocks.filter(block => block.type === 'event_when_flag_clicked');
+                    
+                    flagClickScripts.forEach(startBlock => {
+                       const generator = createGeneratorForStack(startBlock, sprite);
+                       if (generator) {
+                           scriptsToRun.push(generator);
+                       }
+                    });
+                } finally {
+                    tempWorkspace.dispose();
+                }
             }
         });
 
-        if(!scriptsFound) {
-             log('No scripts starting with green flag were found.');
-             scriptRunner.stop(); // Stop immediately if no scripts to run
-             stopAllScripts(); // Also reset UI
+        if (scriptsToRun.length > 0) {
+            log('Script started.');
+            document.getElementById('run-button').classList.add('hidden');
+            document.getElementById('reset-button').classList.remove('hidden');
+            fullscreenRunButton.classList.add('hidden');
+            fullscreenResetButton.classList.remove('hidden');
+            
+            scriptRunner = new ScriptRunner(stopAllScripts);
+            
+            Object.values(sprites).forEach(sprite => {
+                if (sprite.isGif && sprite.animation) {
+                    sprite.animation.isPlaying = true;
+                    sprite.animation.previewIsPlaying = false;
+                    sprite.animation.currentFrame = 0;
+                    updatePropertiesPanel();
+                }
+            });
+            
+            scriptsToRun.forEach(generator => scriptRunner.add(generator));
+        } else {
+            log('No scripts starting with green flag were found.');
         }
     }
     
@@ -2639,14 +2619,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function runBroadcastScripts(message) {
         saveActiveSpriteWorkspace();
-        if (!scriptRunner || !scriptRunner.isRunning) {
-            scriptRunner = new ScriptRunner(stopAllScripts);
-            document.getElementById('run-button').classList.add('hidden');
-            document.getElementById('reset-button').classList.remove('hidden');
-            fullscreenRunButton.classList.add('hidden');
-            fullscreenResetButton.classList.remove('hidden');
-        }
-
+        
+        const scriptsToRun = [];
         Object.values(sprites).forEach(sprite => {
             if (!sprite.workspaceXml) return;
             
@@ -2657,51 +2631,74 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const matchingHatBlocks = topBlocks.filter(block => 
                     block.type === 'event_when_broadcast_received' && 
-                    block.getFieldValue('MESSAGE') === message
+                    block.getFieldValue('MESSAGE') === message &&
+                    block.getNextBlock() // Ensure it has attached blocks
                 );
                 
                 matchingHatBlocks.forEach(startBlock => {
                     const generator = createGeneratorForStack(startBlock, sprite);
-                    if(generator) scriptRunner.add(generator);
+                    if(generator) scriptsToRun.push(generator);
                 });
-                
             } catch (err) {
                 console.error("Error processing workspace for broadcast:", err);
             } finally {
                 tempWorkspace.dispose();
             }
         });
-    }
 
+        if (scriptsToRun.length > 0) {
+            if (!scriptRunner || !scriptRunner.isRunning) {
+                scriptRunner = new ScriptRunner(stopAllScripts);
+                document.getElementById('run-button').classList.add('hidden');
+                document.getElementById('reset-button').classList.remove('hidden');
+                fullscreenRunButton.classList.add('hidden');
+                fullscreenResetButton.classList.remove('hidden');
+            }
+            scriptsToRun.forEach(gen => scriptRunner.add(gen));
+        }
+    }
 
     function handleSpriteClick(spriteId) {
         saveActiveSpriteWorkspace();
         const sprite = sprites[spriteId];
         if (!sprite || !sprite.workspaceXml) return;
-
-        if (!scriptRunner || !scriptRunner.isRunning) {
-            scriptRunner = new ScriptRunner(stopAllScripts);
-             document.getElementById('run-button').classList.add('hidden');
-             document.getElementById('reset-button').classList.remove('hidden');
-             fullscreenRunButton.classList.add('hidden');
-             fullscreenResetButton.classList.remove('hidden');
-        }
-        
+    
+        const scriptsToRun = [];
         const tempWorkspace = new Blockly.Workspace();
-        Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(sprite.workspaceXml), tempWorkspace);
-        const topBlocks = tempWorkspace.getTopBlocks(true);
-        const clickScripts = topBlocks.filter(block => block.type === 'event_when_sprite_clicked');
+        try {
+            Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(sprite.workspaceXml), tempWorkspace);
+            const topBlocks = tempWorkspace.getTopBlocks(true);
+            const clickScripts = topBlocks.filter(block => 
+                block.type === 'event_when_sprite_clicked' && block.getNextBlock()
+            );
+    
+            clickScripts.forEach(startBlock => {
+                const generator = createGeneratorForStack(startBlock, sprite);
+                if (generator) {
+                    scriptsToRun.push(generator);
+                }
+            });
+        } catch (e) {
+            console.error("Error checking for sprite click scripts:", e);
+        } finally {
+            tempWorkspace.dispose();
+        }
 
-        clickScripts.forEach(startBlock => {
-            const generator = createGeneratorForStack(startBlock, sprite);
-            if (generator) scriptRunner.add(generator);
-        });
-        tempWorkspace.dispose();
+        if (scriptsToRun.length > 0) {
+            if (!scriptRunner || !scriptRunner.isRunning) {
+                scriptRunner = new ScriptRunner(stopAllScripts);
+                document.getElementById('run-button').classList.add('hidden');
+                document.getElementById('reset-button').classList.remove('hidden');
+                fullscreenRunButton.classList.add('hidden');
+                fullscreenResetButton.classList.remove('hidden');
+            }
+            scriptsToRun.forEach(gen => scriptRunner.add(gen));
+        }
     }
     
      // --- Collision Detection and Handling ---
     function checkCollisions() {
-        if (isLoadingProject) return;
+        if (isLoadingProject || (scriptRunner && scriptRunner.isRunning)) return;
 
         const spriteIds = Object.keys(sprites);
         if (spriteIds.length < 2) return;
@@ -2744,26 +2741,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function triggerBumpScripts(id1, id2) {
         saveActiveSpriteWorkspace();
-        if (!scriptRunner || !scriptRunner.isRunning) {
-            scriptRunner = new ScriptRunner(stopAllScripts);
-            document.getElementById('run-button').classList.add('hidden');
-            document.getElementById('reset-button').classList.remove('hidden');
-            fullscreenRunButton.classList.add('hidden');
-            fullscreenResetButton.classList.remove('hidden');
-        }
+        
+        const scriptsToRun = [];
 
-        const runForSprite = (spriteToCheck, otherSpriteId) => {
+        const findScriptsForSprite = (spriteToCheck, otherSpriteId) => {
             if (!spriteToCheck.workspaceXml) return;
             const tempWorkspace = new Blockly.Workspace();
             try {
                 Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(spriteToCheck.workspaceXml), tempWorkspace);
-                const bumpScripts = tempWorkspace.getTopBlocks(true).filter(block => block.type === 'event_when_bump');
+                const bumpScripts = tempWorkspace.getTopBlocks(true).filter(block => 
+                    block.type === 'event_when_bump' && block.getNextBlock()
+                );
                 
                 bumpScripts.forEach(scriptBlock => {
                     const targetSpriteId = scriptBlock.getFieldValue('TARGET_SPRITE');
                     if (targetSpriteId === 'ANY' || targetSpriteId === otherSpriteId) {
                         const generator = createGeneratorForStack(scriptBlock, spriteToCheck);
-                        if (generator) scriptRunner.add(generator);
+                        if (generator) scriptsToRun.push(generator);
                     }
                 });
             } catch (e) {
@@ -2773,24 +2767,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        runForSprite(sprites[id1], id2);
-        runForSprite(sprites[id2], id1);
+        findScriptsForSprite(sprites[id1], id2);
+        findScriptsForSprite(sprites[id2], id1);
+
+        if (scriptsToRun.length > 0) {
+            if (!scriptRunner || !scriptRunner.isRunning) {
+                scriptRunner = new ScriptRunner(stopAllScripts);
+                document.getElementById('run-button').classList.add('hidden');
+                document.getElementById('reset-button').classList.remove('hidden');
+                fullscreenRunButton.classList.add('hidden');
+                fullscreenResetButton.classList.remove('hidden');
+            }
+            scriptsToRun.forEach(gen => scriptRunner.add(gen));
+        }
     }
 
-
     function handleKeyPress(event) {
+        saveActiveSpriteWorkspace();
+
         const keyMap = { 'SPACE': ' ', 'UP': 'ArrowUp', 'DOWN': 'ArrowDown', 'RIGHT': 'ArrowRight', 'LEFT': 'ArrowLeft' };
         const pressedKey = event.key;
         
-        saveActiveSpriteWorkspace();
-        if (!scriptRunner || !scriptRunner.isRunning) {
-            scriptRunner = new ScriptRunner(stopAllScripts);
-             document.getElementById('run-button').classList.add('hidden');
-             document.getElementById('reset-button').classList.remove('hidden');
-             fullscreenRunButton.classList.add('hidden');
-             fullscreenResetButton.classList.remove('hidden');
-        }
-
+        const scriptsToRun = [];
         Object.values(sprites).forEach(sprite => {
             if (sprite.workspaceXml) {
                 const tempWorkspace = new Blockly.Workspace();
@@ -2798,11 +2796,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(sprite.workspaceXml), tempWorkspace);
                     const topBlocks = tempWorkspace.getTopBlocks(true);
                     
-                    topBlocks.filter(block => block.type === 'event_when_key_pressed' && keyMap[block.getFieldValue('KEY')] === pressedKey)
-                        .forEach(startBlock => {
-                            const generator = createGeneratorForStack(startBlock, sprite);
-                            if (generator) scriptRunner.add(generator);
-                        });
+                    const matchingScripts = topBlocks.filter(block => 
+                        block.type === 'event_when_key_pressed' && 
+                        keyMap[block.getFieldValue('KEY')] === pressedKey &&
+                        block.getNextBlock()
+                    );
+
+                    matchingScripts.forEach(startBlock => {
+                        const generator = createGeneratorForStack(startBlock, sprite);
+                        if (generator) scriptsToRun.push(generator);
+                    });
                 } catch(e) {
                     console.error("Error in handleKeyPress workspace processing:", e);
                 } finally {
@@ -2810,6 +2813,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+
+        if (scriptsToRun.length > 0) {
+            if (!scriptRunner || !scriptRunner.isRunning) {
+                scriptRunner = new ScriptRunner(stopAllScripts);
+                document.getElementById('run-button').classList.add('hidden');
+                document.getElementById('reset-button').classList.remove('hidden');
+                fullscreenRunButton.classList.add('hidden');
+                fullscreenResetButton.classList.remove('hidden');
+            }
+            scriptsToRun.forEach(gen => scriptRunner.add(gen));
+        }
     }
     document.addEventListener('keydown', handleKeyPress);
 
@@ -2927,6 +2941,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const name = target.alt || 'New Sprite';
             createNewSprite(name, url, 0, 0);
             spriteGallery.classList.remove('visible');
+            stopAllScripts(); // Reset UI state after adding a sprite.
         }
     }
     
@@ -3049,9 +3064,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         const wrapper = spriteContainer.querySelector('.sprite-wrapper');
-        wrapper.addEventListener('click', (e) => { e.stopPropagation(); if (justDragged) return; handleSpriteClick(id); });
-        wrapper.addEventListener('mousedown', (e) => startDrag(e, id));
-        wrapper.addEventListener('touchstart', (e) => startDrag(e, id));
+        wrapper.addEventListener('mousedown', (e) => handleSpriteMouseDown(e, id));
+        wrapper.addEventListener('touchstart', (e) => handleSpriteMouseDown(e, id), { passive: false });
 
         updateSpriteAppearance(id);
     };
@@ -3315,6 +3329,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const name = file.name.split('.')[0];
                     createNewSprite(name, event.target.result);
                     spriteGallery.classList.remove('visible');
+                    stopAllScripts(); // Reset UI state after adding a sprite.
                 };
                 reader.readAsDataURL(file);
              }
@@ -3695,6 +3710,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     createNewSprite(name || 'Character', dataUrl, 0, 0, true, characterData);
                 }
+                stopAllScripts(); // Reset UI state after adding/editing a sprite.
             },
             getSprite: (id) => sprites[id]
         });
