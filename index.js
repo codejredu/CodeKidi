@@ -1,8 +1,9 @@
 
+
 import { initCharacterCreator } from './Caracter.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // START OF CUSTOM TOOLBOX RENDERER
+    // START OF CUSTOM TOOLBOX RRENDERER
     
     /**
      * Safely encode a string to Base64, handling Unicode characters.
@@ -792,6 +793,7 @@ document.addEventListener('DOMContentLoaded', () => {
             isGif: isGif,
             animation: null,
             gifSpeed: gifSpeed,
+            speed: 'instant',
             sounds: [],
             isJumping: false,
             zIndex: nextZIndex++,
@@ -1353,34 +1355,76 @@ document.addEventListener('DOMContentLoaded', () => {
         const steps = Blockly.JavaScript.valueToCode(block, 'STEPS', Blockly.JavaScript.ORDER_ATOMIC) || '10';
         return `
             if (sprite) {
-                const distance = Number(${steps});
-                const radians = sprite.direction * Math.PI / 180;
-                sprite.x += distance * Math.sin(radians);
-                sprite.y += distance * Math.cos(radians);
-                
-                const halfWidth = ${STAGE_WIDTH / 2};
-                const halfHeight = ${STAGE_HEIGHT / 2};
-                const spriteLogicalWidth = 160 * (sprite.size / 100);
-                const spriteLogicalHeight = 160 * (sprite.size / 100);
-                const spriteHalfWidth = spriteLogicalWidth / 2;
-                const spriteHalfHeight = spriteLogicalHeight / 2;
-
-                if (sprite.x - spriteHalfWidth > halfWidth) {
-                    sprite.x = -halfWidth - spriteHalfWidth;
+                const moveSpeed = sprite.speed || 'instant';
+                if (moveSpeed === 'instant') {
+                    const distance = Number(${steps});
+                    const radians = sprite.direction * Math.PI / 180;
+                    sprite.x += distance * Math.sin(radians);
+                    sprite.y += distance * Math.cos(radians);
+                    
+                    const halfWidth = ${STAGE_WIDTH / 2};
+                    const halfHeight = ${STAGE_HEIGHT / 2};
+                    const spriteLogicalWidth = 160 * (sprite.size / 100);
+                    const spriteLogicalHeight = 160 * (sprite.size / 100);
+                    const spriteHalfWidth = spriteLogicalWidth / 2;
+                    const spriteHalfHeight = spriteLogicalHeight / 2;
+    
+                    if (sprite.x - spriteHalfWidth > halfWidth) {
+                        sprite.x = -halfWidth - spriteHalfWidth;
+                    }
+                    if (sprite.x + spriteHalfWidth < -halfWidth) {
+                        sprite.x = halfWidth + spriteHalfWidth;
+                    }
+                    if (sprite.y - spriteHalfHeight > halfHeight) {
+                        sprite.y = -halfHeight - spriteHalfHeight;
+                    }
+                    if (sprite.y + spriteHalfHeight < -halfHeight) {
+                        sprite.y = halfHeight + spriteHalfHeight;
+                    }
+    
+                    window.refreshSprite(sprite);
+                    yield;
+                } else {
+                    const distance = Number(${steps});
+                    if (distance !== 0) {
+                        const startX = sprite.x;
+                        const startY = sprite.y;
+                        
+                        const radians = sprite.direction * Math.PI / 180;
+                        const endX = startX + distance * Math.sin(radians);
+                        const endY = startY + distance * Math.cos(radians);
+    
+                        const speedMap = { slow: 60, normal: 180, fast: 360 };
+                        const pixelsPerSecond = speedMap[moveSpeed] || 180;
+                        
+                        const durationMs = (Math.abs(distance) / pixelsPerSecond) * 1000;
+                        
+                        const startTime = Date.now();
+                        let elapsedTime = 0;
+    
+                        while (elapsedTime < durationMs) {
+                            if (getExecutionCancelled()) break;
+                            
+                            elapsedTime = Date.now() - startTime;
+                            const progress = Math.min(1, elapsedTime / durationMs);
+                            
+                            sprite.x = startX + (endX - startX) * progress;
+                            sprite.y = startY + (endY - startY) * progress;
+                            
+                            window.refreshSprite(sprite);
+                            yield;
+                        }
+                        
+                        if (!getExecutionCancelled()) {
+                            sprite.x = endX;
+                            sprite.y = endY;
+                            window.refreshSprite(sprite);
+                        }
+                    } else {
+                         yield;
+                    }
                 }
-                if (sprite.x + spriteHalfWidth < -halfWidth) {
-                    sprite.x = halfWidth + spriteHalfWidth;
-                }
-                if (sprite.y - spriteHalfHeight > halfHeight) {
-                    sprite.y = -halfHeight - spriteHalfHeight;
-                }
-                if (sprite.y + spriteHalfHeight < -halfHeight) {
-                    sprite.y = halfHeight + spriteHalfHeight;
-                }
-
-                window.refreshSprite(sprite);
             }
-            yield;
         `;
     };
     Blockly.Blocks['motion_turn_right_degrees'] = {
@@ -1425,6 +1469,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 const rotationAmount = Number(${degrees});
                 sprite.direction -= rotationAmount;
                 window.refreshSprite(sprite);
+            }
+            yield;
+        `;
+    };
+    
+    Blockly.Blocks['motion_set_speed'] = {
+        init: function() {
+            this.appendDummyInput()
+                .appendField(new Blockly.FieldImage("https://codejredu.github.io/test/assets/blocklyicon/speedsvg.svg", 34, 34, "*"))
+                .appendField(new Blockly.FieldDropdown([
+                    [{ src: 'https://codejredu.github.io/test/assets/blocklyicon/slow.svg', width: 24, height: 24, alt: 'slow' }, 'slow'],
+                    [{ src: 'https://codejredu.github.io/test/assets/blocklyicon/walksvg.svg', width: 24, height: 24, alt: 'normal' }, 'normal'],
+                    [{ src: 'https://codejredu.github.io/test/assets/blocklyicon/fastspeed.svg', width: 24, height: 24, alt: 'fast' }, 'fast']
+                ]), "SPEED")
+                .appendField('\u00A0\u00A0\u00A0\u00A0\u00A0');
+            this.setPreviousStatement(true, null);
+            this.setNextStatement(true, null);
+            this.setColour("#4C97FF");
+            this.setTooltip("Sets how fast the sprite moves with the 'move' block.");
+            this.getField('SPEED').setValue('normal');
+        }
+    };
+
+    Blockly.JavaScript['motion_set_speed'] = function(block) {
+        const speed = block.getFieldValue('SPEED');
+        return `
+            if (sprite) {
+                sprite.speed = '${speed}';
+                log(sprite.name + ' speed set to ${speed}.');
             }
             yield;
         `;
@@ -2412,48 +2485,70 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function executeBlock(blockId) {
-        const block = workspace.getBlockById(blockId);
-        if (!block || block.type.startsWith('event_')) return;
-        
-        log(`Executing single block: ${block.type}`);
-        
-        const code = Blockly.JavaScript.blockToCode(block);
-        const sprite = getActiveSprite();
-        const GeneratorFunction = Object.getPrototypeOf(function*(){}).constructor;
-        // The generated code will access window.frameDeltaTime, which is updated every tick.
-        const func = new GeneratorFunction('sprite', 'log', 'getExecutionCancelled', 'window', code);
-        const generator = func(sprite, log, getExecutionCancelled, window);
-        
-        if (!scriptRunner || !scriptRunner.isRunning) {
-            scriptRunner = new ScriptRunner(stopAllScripts);
-            document.getElementById('run-button').classList.add('hidden');
-            document.getElementById('reset-button').classList.remove('hidden');
-            fullscreenRunButton.classList.add('hidden');
-            fullscreenResetButton.classList.remove('hidden');
+    function createGeneratorFromBlock(startBlock, sprite) {
+        let code = '';
+        let currentBlock = startBlock; // Start WITH the clicked block
+        while (currentBlock) {
+            code += Blockly.JavaScript.blockToCode(currentBlock);
+            if (getExecutionCancelled()) break;
+            currentBlock = currentBlock.getNextBlock();
         }
-        scriptRunner.add(generator);
+
+        if (!code) return null;
+
+        const GeneratorFunction = Object.getPrototypeOf(function*(){}).constructor;
+        const func = new GeneratorFunction('sprite', 'log', 'getExecutionCancelled', 'window', code);
+        
+        return func(sprite, log, getExecutionCancelled, window);
+    }
+    
+    function runScriptFromBlock(startBlock) {
+        saveActiveSpriteWorkspace();
+        const sprite = getActiveSprite();
+        if (!sprite) {
+            log("No active sprite to run script.");
+            return;
+        }
+        
+        const generator = createGeneratorFromBlock(startBlock, sprite);
+        if (generator) {
+            if (!scriptRunner || !scriptRunner.isRunning) {
+                 scriptRunner = new ScriptRunner(stopAllScripts);
+                 document.getElementById('run-button').classList.add('hidden');
+                 document.getElementById('reset-button').classList.remove('hidden');
+                 fullscreenRunButton.classList.add('hidden');
+                 fullscreenResetButton.classList.remove('hidden');
+            }
+            scriptRunner.add(generator);
+        }
     }
     
     const blocklyDiv = document.getElementById('blockly-area');
     blocklyDiv.addEventListener('click', (event) => {
         if (scriptRunner && scriptRunner.isRunning) return;
+
         const blocklyBlockSvg = event.target.closest('.blocklyDraggable');
-        if (blocklyBlockSvg) {
-            const blockId = blocklyBlockSvg.getAttribute('data-id');
-            if (blockId) {
-                const block = workspace.getBlockById(blockId);
-                if (!block) return;
-                
-                // If block is a standalone block (not connected to anything)
-                if (!block.getParent() && !block.getNextBlock() && !block.getPreviousBlock()) {
-                    if (block.outputConnection) {
-                        showBlockValue(block);
-                    } else {
-                        executeBlock(block.id);
-                    }
-                }
-            }
+        if (!blocklyBlockSvg) return;
+        const blockId = blocklyBlockSvg.getAttribute('data-id');
+        if (!blockId) return;
+        const block = workspace.getBlockById(blockId);
+        if (!block) return;
+
+        // If it's a reporter block (has an output), show its value.
+        if (block.outputConnection) {
+            showBlockValue(block);
+            return;
+        }
+
+        // If it's a "hat" block (starts a script), run the stack below it.
+        // A hat block has a next connection but no previous connection.
+        if (!block.previousConnection && block.nextConnection) {
+            runScriptStack(block);
+        } 
+        // For any other command block (regular, terminator, or standalone),
+        // run the script starting from this block itself.
+        else {
+            runScriptFromBlock(block);
         }
     });
 
@@ -3040,6 +3135,7 @@ document.addEventListener('DOMContentLoaded', () => {
         spriteData.sounds = sounds || [];
         spriteData.isJumping = false; // Runtime state, always reset on load
         spriteData.zIndex = zIndex || nextZIndex++; // Use loaded zIndex or assign a new one
+        spriteData.speed = spriteData.speed || 'instant';
         sprites[id] = spriteData;
 
         createAndAttachSpriteCard(spriteData);
