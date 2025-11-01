@@ -1355,73 +1355,59 @@ document.addEventListener('DOMContentLoaded', () => {
         const steps = Blockly.JavaScript.valueToCode(block, 'STEPS', Blockly.JavaScript.ORDER_ATOMIC) || '10';
         return `
             if (sprite) {
+                const halfWidth = ${STAGE_WIDTH / 2};
+                const halfHeight = ${STAGE_HEIGHT / 2};
+                const spriteLogicalWidth = 160 * (sprite.size / 100);
+                const spriteLogicalHeight = 160 * (sprite.size / 100);
+                const spriteHalfWidth = spriteLogicalWidth / 2;
+                const spriteHalfHeight = spriteLogicalHeight / 2;
+    
+                const wrapPosition = () => {
+                    if (sprite.x - spriteHalfWidth > halfWidth) sprite.x = -halfWidth - spriteHalfWidth;
+                    if (sprite.x + spriteHalfWidth < -halfWidth) sprite.x = halfWidth + spriteHalfWidth;
+                    if (sprite.y - spriteHalfHeight > halfHeight) sprite.y = -halfHeight - spriteHalfHeight;
+                    if (sprite.y + spriteHalfHeight < -halfHeight) sprite.y = halfHeight + spriteHalfHeight;
+                };
+    
                 const moveSpeed = sprite.speed || 'instant';
                 if (moveSpeed === 'instant') {
                     const distance = Number(${steps});
                     const radians = sprite.direction * Math.PI / 180;
                     sprite.x += distance * Math.sin(radians);
                     sprite.y += distance * Math.cos(radians);
-                    
-                    const halfWidth = ${STAGE_WIDTH / 2};
-                    const halfHeight = ${STAGE_HEIGHT / 2};
-                    const spriteLogicalWidth = 160 * (sprite.size / 100);
-                    const spriteLogicalHeight = 160 * (sprite.size / 100);
-                    const spriteHalfWidth = spriteLogicalWidth / 2;
-                    const spriteHalfHeight = spriteLogicalHeight / 2;
-    
-                    if (sprite.x - spriteHalfWidth > halfWidth) {
-                        sprite.x = -halfWidth - spriteHalfWidth;
-                    }
-                    if (sprite.x + spriteHalfWidth < -halfWidth) {
-                        sprite.x = halfWidth + spriteHalfWidth;
-                    }
-                    if (sprite.y - spriteHalfHeight > halfHeight) {
-                        sprite.y = -halfHeight - spriteHalfHeight;
-                    }
-                    if (sprite.y + spriteHalfHeight < -halfHeight) {
-                        sprite.y = halfHeight + spriteHalfHeight;
-                    }
-    
+                    wrapPosition();
                     window.refreshSprite(sprite);
                     yield;
                 } else {
                     const distance = Number(${steps});
                     if (distance !== 0) {
-                        const startX = sprite.x;
-                        const startY = sprite.y;
-                        
-                        const radians = sprite.direction * Math.PI / 180;
-                        const endX = startX + distance * Math.sin(radians);
-                        const endY = startY + distance * Math.cos(radians);
-    
-                        const speedMap = { slow: 60, normal: 180, fast: 360 };
+                        const speedMap = { slow: 60, normal: 180, fast: 360 }; // pixels per second
                         const pixelsPerSecond = speedMap[moveSpeed] || 180;
                         
-                        const durationMs = (Math.abs(distance) / pixelsPerSecond) * 1000;
-                        
-                        const startTime = Date.now();
-                        let elapsedTime = 0;
+                        const distanceToMove = Math.abs(distance);
+                        let distanceMoved = 0;
+                        const radians = sprite.direction * Math.PI / 180;
+                        const sign = distance > 0 ? 1 : -1;
     
-                        while (elapsedTime < durationMs) {
+                        while (distanceMoved < distanceToMove) {
                             if (getExecutionCancelled()) break;
                             
-                            elapsedTime = Date.now() - startTime;
-                            const progress = Math.min(1, elapsedTime / durationMs);
+                            const frameMoveAmount = (pixelsPerSecond * window.frameDeltaTime / 1000);
+                            const remainingDistance = distanceToMove - distanceMoved;
+                            const finalMoveAmount = Math.min(frameMoveAmount, remainingDistance) * sign;
+    
+                            sprite.x += finalMoveAmount * Math.sin(radians);
+                            sprite.y += finalMoveAmount * Math.cos(radians);
                             
-                            sprite.x = startX + (endX - startX) * progress;
-                            sprite.y = startY + (endY - startY) * progress;
+                            wrapPosition();
+                            
+                            distanceMoved += Math.abs(finalMoveAmount);
                             
                             window.refreshSprite(sprite);
                             yield;
                         }
-                        
-                        if (!getExecutionCancelled()) {
-                            sprite.x = endX;
-                            sprite.y = endY;
-                            window.refreshSprite(sprite);
-                        }
                     } else {
-                         yield;
+                        yield;
                     }
                 }
             }
