@@ -2357,16 +2357,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     workspace.addChangeListener((event) => {
-        if (event.type === Blockly.Events.BLOCK_MOVE) {
-            const numberPad = document.getElementById('number-pad-container');
-            if (numberPad.style.display === 'block' && numberPad.currentField) {
-                const fieldBlockId = numberPad.currentField.getSourceBlock().id;
-                if (event.blockId === fieldBlockId) {
-                    positionNumberPad(numberPad.currentField);
+        // Automatically save the workspace on any meaningful change to prevent desync issues.
+        // We ignore UI events like selecting a block or scrolling the workspace.
+        if (event.isUiEvent) {
+            // Still need to handle number pad positioning on block move, which is a UI event.
+            if (event.type === Blockly.Events.BLOCK_MOVE) {
+                const numberPad = document.getElementById('number-pad-container');
+                if (numberPad.style.display === 'block' && numberPad.currentField) {
+                    const fieldBlockId = numberPad.currentField.getSourceBlock().id;
+                    if (event.blockId === fieldBlockId) {
+                        positionNumberPad(numberPad.currentField);
+                    }
                 }
             }
+            return;
         }
+
+        // Any other event (create, delete, change, move that isn't a drag) represents a change to the code.
+        saveActiveSpriteWorkspace();
         
+        // Handle drag start for script copying
         if (event.type === Blockly.Events.BLOCK_DRAG && event.isStart) {
             const block = workspace.getBlockById(event.blockId);
             // We only care about dragging top-level blocks (the start of a script)
