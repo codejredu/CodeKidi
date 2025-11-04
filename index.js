@@ -3463,12 +3463,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 imageData: null, 
             };
             
-            const canvas = document.querySelector(`#container-${sprite.id} canvas`);
-            if (canvas) {
-                canvas.classList.remove('hidden');
-                canvas.width = parsedGif.width;
-                canvas.height = parsedGif.height;
-                drawGifFrame(sprite);
+            const container = document.querySelector(`#container-${sprite.id}`);
+            if (container) {
+                const canvas = container.querySelector('canvas');
+                const img = container.querySelector('img');
+                if (canvas && img) {
+                    img.classList.add('hidden'); // Hide the original img
+                    canvas.classList.remove('hidden');
+                    canvas.width = parsedGif.width;
+                    canvas.height = parsedGif.height;
+                    drawGifFrame(sprite);
+                }
             }
         } catch(e) {
             console.error("Failed to load or parse GIF:", sprite.imageUrl, e);
