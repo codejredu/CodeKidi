@@ -2320,7 +2320,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (hoveredSpriteIdForDrop) {
             const targetSprite = sprites[hoveredSpriteIdForDrop];
             if (targetSprite) {
-                const tempWorkspace = new Blockly.Workspace();
+                // Using a headless workspace is fine because we'll inject coordinates into the XML.
+                const tempWorkspace = new Blockly.Workspace(); 
                 try {
                     // Load existing blocks
                     if (targetSprite.workspaceXml) {
@@ -2328,7 +2329,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         Blockly.Xml.domToWorkspace(dom, tempWorkspace);
                     }
     
-                    // Add the new block stack
+                    // Position the new block in the center of the visible workspace area
+                    const metrics = workspace.getMetrics();
+                    // We target the center of the current view.
+                    const targetX = metrics.viewLeft + metrics.viewWidth / 2;
+                    const targetY = metrics.viewTop + metrics.viewHeight / 2;
+                    
+                    // Modify the XML to include the desired coordinates.
+                    // This ensures the copied script is immediately visible.
+                    draggedBlockXml.setAttribute('x', targetX);
+                    draggedBlockXml.setAttribute('y', targetY);
+
+                    // Add the new block stack from the modified XML
                     Blockly.Xml.domToBlock(draggedBlockXml, tempWorkspace);
     
                     // Save the combined workspace
@@ -2357,10 +2369,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     workspace.addChangeListener((event) => {
-        // Automatically save the workspace on any meaningful change to prevent desync issues.
-        // We ignore UI events like selecting a block or scrolling the workspace.
         if (event.isUiEvent) {
-            // Still need to handle number pad positioning on block move, which is a UI event.
+            // Handle number pad positioning on block move, which is a UI event.
             if (event.type === Blockly.Events.BLOCK_MOVE) {
                 const numberPad = document.getElementById('number-pad-container');
                 if (numberPad.style.display === 'block' && numberPad.currentField) {
@@ -2370,26 +2380,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
+
+            // Handle drag start for script copying
+            if (event.type === Blockly.Events.BLOCK_DRAG && event.isStart) {
+                const block = workspace.getBlockById(event.blockId);
+                // We only care about dragging top-level blocks (the start of a script)
+                if (block && !block.getParent()) {
+                    isDraggingBlockForCopy = true;
+                    sourceSpriteIdForCopy = activeSpriteId;
+                    draggedBlockXml = Blockly.Xml.blockToDom(block);
+                    
+                    // Add listeners to the whole document to catch the drop anywhere
+                    document.addEventListener('mousemove', handleBlockDragHover);
+                    document.addEventListener('mouseup', handleBlockDrop, { once: true });
+                }
+            }
+            
             return;
         }
 
         // Any other event (create, delete, change, move that isn't a drag) represents a change to the code.
         saveActiveSpriteWorkspace();
-        
-        // Handle drag start for script copying
-        if (event.type === Blockly.Events.BLOCK_DRAG && event.isStart) {
-            const block = workspace.getBlockById(event.blockId);
-            // We only care about dragging top-level blocks (the start of a script)
-            if (block && !block.getParent()) {
-                isDraggingBlockForCopy = true;
-                sourceSpriteIdForCopy = activeSpriteId;
-                draggedBlockXml = Blockly.Xml.blockToDom(block);
-                
-                // Add listeners to the whole document to catch the drop anywhere
-                document.addEventListener('mousemove', handleBlockDragHover);
-                document.addEventListener('mouseup', handleBlockDrop, { once: true });
-            }
-        }
     });
 
     const getExecutionCancelled = () => executionCancelled;
