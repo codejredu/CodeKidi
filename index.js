@@ -2349,10 +2349,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     targetSprite.workspaceXml = Blockly.Xml.domToText(newXmlDom);
                     log(`Script copied to ${targetSprite.name}.`);
 
-                    // Switch to the target sprite AFTER the current event loop finishes,
-                    // allowing Blockly to complete its drag operation without interference.
-                    setTimeout(() => setActiveSprite(hoveredSpriteIdForDrop), 0);
-
                 } catch (error) {
                     console.error("Error copying script:", error);
                 } finally {
