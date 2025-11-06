@@ -2,7 +2,15 @@
 
 /* START OF FILE index.css */
 
-
+        @keyframes wobble-animation {
+          15% { transform: rotate(5deg); }
+          30% { transform: rotate(-5deg); }
+          45% { transform: rotate(3deg); }
+          60% { transform: rotate(-3deg); }
+          75% { transform: rotate(2deg); }
+          90% { transform: rotate(-2deg); }
+          100% { transform: rotate(0deg); }
+        }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -240,6 +248,7 @@
             transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
             position: relative;
             flex-shrink: 0;
+            transform-origin: center;
         }
         .sprite-card.selected {
             border-color: #3b82f6; /* Blue accent for selection */
@@ -248,7 +257,7 @@
         .sprite-card.drop-target-hover {
             border-color: #f59e0b; /* Amber color */
             box-shadow: 0 0 15px rgba(245, 158, 11, 0.7);
-            transform: scale(1.05);
+            animation: wobble-animation 0.6s ease-in-out;
         }
         .sprite-card img {
             width: 48px;

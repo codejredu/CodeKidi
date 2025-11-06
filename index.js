@@ -365,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let recordedBlob = null;
     
     // --- Script Copy Drag/Drop State ---
-    let isDraggingBlockForCopy = false;
+    let isDraggingForCopy = false;
     let draggedBlockXml = null;
     let sourceSpriteIdForCopy = null;
     let hoveredSpriteIdForDrop = null;
@@ -899,7 +899,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const setActiveSprite = (spriteId) => {
-        if ((scriptRunner && scriptRunner.isRunning) || activeSpriteId === spriteId) return;
+        // Allow switching anyway, as per user request
+        
+        if (activeSpriteId === spriteId) return;
 
         // 1. Save current workspace
         if (activeSpriteId && sprites[activeSpriteId]) {
@@ -2283,20 +2285,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * Handles highlighting sprite cards when a block is dragged over them.
+     * This is the 'mousemove' event handler.
      * @param {MouseEvent} e The mouse move event.
      */
-    function handleBlockDragHover(e) {
-        if (!isDraggingBlockForCopy) return;
-    
+    function handleDragHover(e) {
+        if (!isDraggingForCopy) return;
+
         let currentlyHoveredId = null;
-    
+
         document.querySelectorAll('.sprite-card').forEach(card => {
             const cardId = card.dataset.spriteId;
+            // Don't allow dropping on the source sprite.
             if (cardId === sourceSpriteIdForCopy) {
                 card.classList.remove('drop-target-hover');
-                return; // Skip the source sprite
+                return;
             }
-    
+
             const rect = card.getBoundingClientRect();
             if (e.clientX >= rect.left && e.clientX <= rect.right &&
                 e.clientY >= rect.top && e.clientY <= rect.bottom) {
@@ -2306,72 +2310,80 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.classList.remove('drop-target-hover');
             }
         });
-    
+
         hoveredSpriteIdForDrop = currentlyHoveredId;
     }
 
+
     /**
-     * Handles copying the script when a block is dropped on a sprite card.
-     * @param {MouseEvent} e The mouse up event.
+     * Handles the drop action when the mouse is released after dragging a block.
+     * This is the 'mouseup' event handler.
      */
-    function handleBlockDrop(e) {
-        if (!isDraggingBlockForCopy) return;
-    
+    function handleDragEnd() {
+        if (!isDraggingForCopy) return;
+
         if (hoveredSpriteIdForDrop) {
             const targetSprite = sprites[hoveredSpriteIdForDrop];
             if (targetSprite) {
-                // Using a headless workspace is fine because we'll inject coordinates into the XML.
-                const tempWorkspace = new Blockly.Workspace(); 
+                // This is a valid drop. Perform the copy.
+                const tempWorkspace = new Blockly.Workspace();
                 try {
-                    // Load existing blocks
+                    // Load target's existing XML
                     if (targetSprite.workspaceXml) {
                         const dom = Blockly.Xml.textToDom(targetSprite.workspaceXml);
                         Blockly.Xml.domToWorkspace(dom, tempWorkspace);
                     }
-    
-                    // Position the new block in the center of the visible workspace area
+
+                    // Position the new block in the center of the main workspace view
                     const metrics = workspace.getMetrics();
-                    // We target the center of the current view.
                     const targetX = metrics.viewLeft + metrics.viewWidth / 2;
                     const targetY = metrics.viewTop + metrics.viewHeight / 2;
-                    
-                    // Modify the XML to include the desired coordinates.
-                    // This ensures the copied script is immediately visible.
                     draggedBlockXml.setAttribute('x', targetX);
                     draggedBlockXml.setAttribute('y', targetY);
 
-                    // Add the new block stack from the modified XML
+                    // Add the new block
                     Blockly.Xml.domToBlock(draggedBlockXml, tempWorkspace);
-    
-                    // Save the combined workspace
+
+                    // Save the combined XML back to the target sprite
                     const newXmlDom = Blockly.Xml.workspaceToDom(tempWorkspace);
                     targetSprite.workspaceXml = Blockly.Xml.domToText(newXmlDom);
-    
-                    log(`Script copied from ${sprites[sourceSpriteIdForCopy].name} to ${targetSprite.name}.`);
-                } catch(error) {
+                    log(`Script copied to ${targetSprite.name}.`);
+
+                    // Switch to the target sprite AFTER the current event loop finishes,
+                    // allowing Blockly to complete its drag operation without interference.
+                    setTimeout(() => setActiveSprite(hoveredSpriteIdForDrop), 0);
+
+                } catch (error) {
                     console.error("Error copying script:", error);
                 } finally {
                     tempWorkspace.dispose();
                 }
             }
         }
-    
-        // Cleanup
-        document.removeEventListener('mousemove', handleBlockDragHover);
-        isDraggingBlockForCopy = false;
-        draggedBlockXml = null;
+
+        // --- CRITICAL: Always cleanup ---
+        const rightPanel = document.querySelector('.right-panel');
+        rightPanel.style.position = ''; // Reset position
+        rightPanel.style.zIndex = ''; // Reset z-index
+
+        isDraggingForCopy = false;
         sourceSpriteIdForCopy = null;
         hoveredSpriteIdForDrop = null;
-    
+        draggedBlockXml = null;
+
+        document.removeEventListener('mousemove', handleDragHover);
+        document.removeEventListener('mouseup', handleDragEnd);
+
+        // Remove any lingering hover effects
         document.querySelectorAll('.sprite-card.drop-target-hover').forEach(card => {
             card.classList.remove('drop-target-hover');
         });
     }
 
     workspace.addChangeListener((event) => {
+        // UI events are for things like opening the toolbox, dragging blocks, etc.
         if (event.isUiEvent) {
-            // Handle number pad positioning on block move, which is a UI event.
-            if (event.type === Blockly.Events.BLOCK_MOVE) {
+             if (event.type === Blockly.Events.BLOCK_MOVE) {
                 const numberPad = document.getElementById('number-pad-container');
                 if (numberPad.style.display === 'block' && numberPad.currentField) {
                     const fieldBlockId = numberPad.currentField.getSourceBlock().id;
@@ -2381,25 +2393,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // Handle drag start for script copying
-            if (event.type === Blockly.Events.BLOCK_DRAG && event.isStart) {
-                const block = workspace.getBlockById(event.blockId);
-                // We only care about dragging top-level blocks (the start of a script)
-                if (block && !block.getParent()) {
-                    isDraggingBlockForCopy = true;
-                    sourceSpriteIdForCopy = activeSpriteId;
-                    draggedBlockXml = Blockly.Xml.blockToDom(block);
-                    
-                    // Add listeners to the whole document to catch the drop anywhere
-                    document.addEventListener('mousemove', handleBlockDragHover);
-                    document.addEventListener('mouseup', handleBlockDrop, { once: true });
+            if (event.type === Blockly.Events.BLOCK_DRAG) {
+                // A drag has started
+                if (event.isStart) {
+                    const block = workspace.getBlockById(event.blockId);
+                    // We only care about dragging top-level blocks (entire stacks)
+                    if (block && !block.getParent()) {
+                        const rightPanel = document.querySelector('.right-panel');
+                        rightPanel.style.position = 'relative'; // Ensure z-index works
+                        rightPanel.style.zIndex = '60'; // Bring to front
+                        isDraggingForCopy = true;
+                        sourceSpriteIdForCopy = activeSpriteId;
+                        draggedBlockXml = Blockly.Xml.blockToDom(block);
+                        
+                        // Attach global listeners to track mouse outside the workspace
+                        document.addEventListener('mousemove', handleDragHover);
+                        document.addEventListener('mouseup', handleDragEnd);
+                    }
                 }
+                // The handleDragEnd function will be called on mouseup for cleanup.
+                // This is simpler and more reliable than trying to use the drag 'end' event.
             }
-            
-            return;
+            return; // Don't save workspace on UI events
         }
-
-        // Any other event (create, delete, change, move that isn't a drag) represents a change to the code.
+        // Any other event (create, delete, change) is a real model change
         saveActiveSpriteWorkspace();
     });
 
@@ -2870,7 +2887,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         findScriptsForSprite(sprites[id1], id2);
-        findScriptsForSprite(sprites[id2], id1);
+        findScriptsForSprite(sprites[id2], id2);
 
         if (scriptsToRun.length > 0) {
             if (!scriptRunner || !scriptRunner.isRunning) {
