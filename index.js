@@ -2545,8 +2545,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const blocklyDiv = document.getElementById('blockly-area');
     blocklyDiv.addEventListener('click', (event) => {
-        if (scriptRunner && scriptRunner.isRunning) return;
-
         const blocklyBlockSvg = event.target.closest('.blocklyDraggable');
         if (!blocklyBlockSvg) return;
         const blockId = blocklyBlockSvg.getAttribute('data-id');
@@ -2813,7 +2811,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
      // --- Collision Detection and Handling ---
     function checkCollisions() {
-        if (isLoadingProject || (scriptRunner && scriptRunner.isRunning)) return;
+        if (isLoadingProject) return;
 
         const spriteIds = Object.keys(sprites);
         if (spriteIds.length < 2) return;
