@@ -623,8 +623,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'left-right':
                     // Normalize direction to [0, 360)
                     const normalizedDir = ((spriteData.direction % 360) + 360) % 360;
-                    // Flip when direction is between 90 and 270
-                    const isFlipped = normalizedDir > 90 && normalizedDir < 270;
+                    // Face right for 0-179, face left for 180-359
+                    const isFlipped = normalizedDir >= 180;
                     rotationTransform = isFlipped ? 'scaleX(-1)' : 'scaleX(1)';
                     break;
                 case 'dont-rotate':
