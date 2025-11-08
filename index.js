@@ -646,9 +646,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // Position the main container which holds the wrapper
             container.style.transform = `translate(${stageX}px, ${stageY}px)`;
             container.style.zIndex = spriteData.zIndex;
-            
-            // After any visual update, check for collisions
-            checkCollisions();
         }
     };
     
@@ -3787,6 +3784,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (scriptRunner) {
             scriptRunner.tick();
         }
+
+        // Check for collisions AFTER all scripts have had a chance to run for this frame.
+        checkCollisions();
 
         Object.values(sprites).forEach(sprite => {
             if (sprite.isGif && sprite.animation && (sprite.animation.isPlaying || sprite.animation.previewIsPlaying)) {
