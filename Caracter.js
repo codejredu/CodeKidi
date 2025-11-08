@@ -10,6 +10,7 @@ const safeBtoa = (str) => btoa(unescape(encodeURIComponent(str)));
 const ASSET_CATEGORIES = {
     shirt: {
         label: 'Shirts',
+        icon: 'https://codejredu.github.io/test/assets/blocklyicon/t-shirt.svg',
         parts: [
             'https://codejredu.github.io/test/assets/parts/shirt1.svg',
             'https://codejredu.github.io/test/assets/parts/shirt2.svg',
@@ -20,6 +21,7 @@ const ASSET_CATEGORIES = {
     },
      pants: {
         label: 'Pants',
+        icon: 'https://codejredu.github.io/test/assets/blocklyicon/pants.svg',
         parts: [
             'https://codejredu.github.io/test/assets/parts/pants1.svg',
             'https://codejredu.github.io/test/assets/parts/pants2.svg',
@@ -33,6 +35,7 @@ const ASSET_CATEGORIES = {
     },
     dresses: {
         label: 'Dresses',
+        icon: 'https://codejredu.github.io/test/assets/blocklyicon/formal-dresses.svg',
         parts: [
             'https://codejredu.github.io/test/assets/parts/drees1.svg',
             'https://codejredu.github.io/test/assets/parts/drees2.svg',
@@ -43,6 +46,7 @@ const ASSET_CATEGORIES = {
     },
     shoes: {
         label: 'Shoes',
+        icon: 'https://codejredu.github.io/test/assets/blocklyicon/shoes.svg',
         parts: [
             'https://codejredu.github.io/test/assets/parts/shoes1.svg',
             'https://codejredu.github.io/test/assets/parts/shoes2.svg',
@@ -53,6 +57,7 @@ const ASSET_CATEGORIES = {
     },
     head: {
         label: 'Head',
+        icon: 'https://codejredu.github.io/test/assets/blocklyicon/head1.svg',
         parts: [
             'https://codejredu.github.io/test/assets/parts/face1.svg',
             'https://codejredu.github.io/test/assets/parts/face2.svg',
@@ -78,6 +83,7 @@ const ASSET_CATEGORIES = {
     },
     eyes: { 
         label: 'Eyes', 
+        icon: 'https://codejredu.github.io/test/assets/blocklyicon/eye1.svg',
         parts: [
             'https://codejredu.github.io/test/assets/parts/eye1.svg',
             'https://codejredu.github.io/test/assets/parts/eye2.svg',
@@ -91,6 +97,7 @@ const ASSET_CATEGORIES = {
     },
     nose: {
         label: 'Noses',
+        icon: 'https://codejredu.github.io/test/assets/blocklyicon/nose1.svg',
         parts: [
             'https://codejredu.github.io/test/assets/parts/Nose1.svg',
             'https://codejredu.github.io/test/assets/parts/Nose2.svg',
@@ -103,6 +110,7 @@ const ASSET_CATEGORIES = {
     },
     mouth: {
         label: 'Mouth',
+        icon: 'https://codejredu.github.io/test/assets/blocklyicon/mouth.svg',
         parts: [
             'https://codejredu.github.io/test/assets/parts/mouth1.svg',
             'https://codejredu.github.io/test/assets/parts/mouth2.svg',
@@ -115,6 +123,7 @@ const ASSET_CATEGORIES = {
     },
     hand: {
         label: 'Hands',
+        icon: 'https://codejredu.github.io/test/assets/blocklyicon/arm-pit.svg',
         parts: [
             'https://codejredu.github.io/test/assets/parts/hand1.svg',
             'https://codejredu.github.io/test/assets/parts/hand2.svg',
@@ -138,7 +147,7 @@ const PART_PROPORTIONS = {
 };
 const COLOR_PALETTE = ['#000000', '#FFFFFF', '#FF5733', '#FFC300', '#4CAF50', '#3498DB', '#9B59B6', '#E91E63', '#9E9E9E', '#795548', '#607D8B', '#ffdfba', '#ffadad', '#ffd6a5', '#caffbf', '#a0c4ff'];
 const SKIN_TONE_PALETTE = ['#8d5524', '#c68642', '#e0ac69', '#f1c27d', '#ffdbac', '#ead2c2'];
-const DRAW_ORDER = ['pants', 'shoes', 'shirt', 'hand', 'dresses', 'head', 'nose', 'mouth', 'eyes'];
+const DRAW_ORDER = ['pants', 'shoes', 'shirt', 'dresses', 'hand', 'head', 'nose', 'mouth', 'eyes'];
 
 
 class CharacterCreator {
@@ -297,11 +306,26 @@ class CharacterCreator {
     populateCategories() {
         this.categoriesContainer.innerHTML = '';
         Object.keys(ASSET_CATEGORIES).forEach(key => {
+            const categoryData = ASSET_CATEGORIES[key];
             const button = document.createElement('button');
             button.className = 'category-button';
-            button.textContent = ASSET_CATEGORIES[key].label;
             button.dataset.category = key;
+            button.title = categoryData.label;
+
+            const icon = document.createElement('img');
+            icon.src = categoryData.icon;
+            icon.className = 'category-icon';
+            icon.alt = categoryData.label;
+
+            const label = document.createElement('span');
+            label.className = 'category-label';
+            label.textContent = categoryData.label;
+            
+            button.appendChild(icon);
+            button.appendChild(label);
+
             if (key === this.activeCategory) button.classList.add('active');
+            
             button.addEventListener('click', () => {
                 this.activeCategory = key;
                 this.populateCategories();
