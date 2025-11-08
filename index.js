@@ -3252,25 +3252,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Properties Panel Listeners ---
     function setupPropertiesPanelListeners() {
-        propName.addEventListener('change', (e) => {
+        propName.addEventListener('input', (e) => {
             const sprite = getActiveSprite();
             if (sprite) sprite.name = e.target.value;
         });
-        propX.addEventListener('change', (e) => {
+        propX.addEventListener('input', (e) => {
             const sprite = getActiveSprite();
             if (sprite) {
                 sprite.x = Number(e.target.value);
                 window.refreshSprite(sprite);
             }
         });
-        propY.addEventListener('change', (e) => {
+        propY.addEventListener('input', (e) => {
             const sprite = getActiveSprite();
             if (sprite) {
                 sprite.y = Number(e.target.value);
                 window.refreshSprite(sprite);
             }
         });
-        propSize.addEventListener('change', (e) => {
+        propSize.addEventListener('input', (e) => {
             const sprite = getActiveSprite();
             if (sprite) {
                 sprite.size = Number(e.target.value);
@@ -3278,7 +3278,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        propDirection.addEventListener('change', (e) => {
+        propDirection.addEventListener('input', (e) => {
             const sprite = getActiveSprite();
             if (sprite) {
                 sprite.direction = Number(e.target.value);
@@ -3785,7 +3785,7 @@ document.addEventListener('DOMContentLoaded', () => {
             scriptRunner.tick();
         }
 
-        // Check for collisions AFTER all scripts have had a chance to run for this frame.
+        // Centralized collision check after all sprites have potentially moved
         checkCollisions();
 
         Object.values(sprites).forEach(sprite => {
