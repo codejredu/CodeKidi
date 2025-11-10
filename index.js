@@ -894,9 +894,113 @@ document.addEventListener('DOMContentLoaded', () => {
         // 5. Reset the run/stop buttons to the initial state.
         stopAllScripts();
     };
+    
+    // --- Angle Picker State & Handlers (Refactored for Robustness) ---
+    let anglePickerTargetSpriteId = null;
+    let isAnglePickerDragging = false;
+    
+    const handleAnglePickerDrag = (moveEvent) => {
+        if (!anglePickerTargetSpriteId) return;
+        moveEvent.preventDefault();
+        const sprite = sprites[anglePickerTargetSpriteId];
+        if (!sprite) return;
+    
+        const dialRect = anglePickerDial.getBoundingClientRect();
+        const centerX = dialRect.left + dialRect.width / 2;
+        const centerY = dialRect.top + dialRect.height / 2;
+        const pointer = moveEvent.touches ? moveEvent.touches[0] : moveEvent;
+        const angleRad = Math.atan2(pointer.clientY - centerY, pointer.clientX - centerX);
+        let angleDeg = angleRad * 180 / Math.PI;
+    
+        let newDirection = Math.round(angleDeg + 90);
+        if (newDirection < 0) newDirection += 360;
+    
+        sprite.direction = newDirection;
+        propDirection.value = newDirection; // Update input field
+        anglePickerHandle.style.transform = `rotate(${angleRad}rad)`;
+        window.refreshSprite(sprite);
+    };
+    
+    const stopAnglePickerDrag = () => {
+        isAnglePickerDragging = false;
+        document.removeEventListener('mousemove', handleAnglePickerDrag);
+        document.removeEventListener('mouseup', stopAnglePickerDrag);
+        document.removeEventListener('touchmove', handleAnglePickerDrag);
+        document.removeEventListener('touchend', stopAnglePickerDrag);
+    };
+    
+    const handleAnglePickerMouseDown = (downEvent) => {
+        isAnglePickerDragging = true;
+        handleAnglePickerDrag(downEvent); // Set initial angle
+        document.addEventListener('mousemove', handleAnglePickerDrag);
+        document.addEventListener('mouseup', stopAnglePickerDrag, { once: true });
+    };
+    
+    const handleAnglePickerTouchStart = (downEvent) => {
+        isAnglePickerDragging = true;
+        handleAnglePickerDrag(downEvent); // Set initial angle
+        document.addEventListener('touchmove', handleAnglePickerDrag, { passive: false });
+        document.addEventListener('touchend', stopAnglePickerDrag, { once: true });
+    };
 
+    function hideAnglePickerOnClickOutside(event) {
+        if (!anglePickerWidget.contains(event.target) && event.target !== propDirection) {
+            closeAnglePicker();
+        }
+    }
+    
+    function closeAnglePicker() {
+        if (anglePickerWidget.style.display === 'none') return;
+        
+        stopAnglePickerDrag();
+        anglePickerDial.removeEventListener('mousedown', handleAnglePickerMouseDown);
+        anglePickerDial.removeEventListener('touchstart', handleAnglePickerTouchStart);
+        document.removeEventListener('click', hideAnglePickerOnClickOutside, true);
+    
+        anglePickerWidget.style.display = 'none';
+        anglePickerTargetSpriteId = null;
+        isAnglePickerDragging = false; // Ensure flag is reset
+    }
+    
+    function openAnglePicker() {
+        const sprite = getActiveSprite();
+        if (!sprite) return;
+    
+        if (anglePickerWidget.style.display !== 'none') {
+            closeAnglePicker();
+        }
+        
+        anglePickerTargetSpriteId = sprite.id;
+    
+        anglePickerWidget.style.display = 'flex';
+        const inputRect = propDirection.getBoundingClientRect();
+        const widgetWidth = anglePickerWidget.offsetWidth;
+        const widgetHeight = anglePickerWidget.offsetHeight;
+    
+        let left = inputRect.left - widgetWidth - 10;
+        let top = inputRect.top + (inputRect.height / 2) - (widgetHeight / 2);
+    
+        if (left < 5) { 
+            left = inputRect.left + (inputRect.width / 2) - (widgetWidth / 2);
+            top = inputRect.bottom + 5;
+        }
+        if (top < 5) top = 5;
+        if (top + widgetHeight > window.innerHeight) top = window.innerHeight - widgetHeight - 5;
+        
+        anglePickerWidget.style.left = `${left}px`;
+        anglePickerWidget.style.top = `${top}px`;
+    
+        const currentAngleRad = (sprite.direction - 90) * Math.PI / 180;
+        anglePickerHandle.style.transform = `rotate(${currentAngleRad}rad)`;
+    
+        anglePickerDial.addEventListener('mousedown', handleAnglePickerMouseDown);
+        anglePickerDial.addEventListener('touchstart', handleAnglePickerTouchStart, { passive: false });
+    
+        setTimeout(() => document.addEventListener('click', hideAnglePickerOnClickOutside, true), 0);
+    }
+    
     const setActiveSprite = (spriteId) => {
-        // Allow switching anyway, as per user request
+        closeAnglePicker(); // Close angle picker whenever the active sprite changes.
         
         if (activeSpriteId === spriteId) return;
 
@@ -3279,6 +3383,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         propDirection.addEventListener('input', (e) => {
+            // Prevent this listener from firing during a drag operation from the angle picker
+            if (isAnglePickerDragging) return;
             const sprite = getActiveSprite();
             if (sprite) {
                 sprite.direction = Number(e.target.value);
@@ -3288,74 +3394,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         propDirection.addEventListener('click', (e) => {
             e.stopPropagation();
-            const sprite = getActiveSprite();
-            if (!sprite) return;
-            
-            anglePickerWidget.style.display = 'flex';
-            const inputRect = propDirection.getBoundingClientRect();
-            const widgetWidth = anglePickerWidget.offsetWidth;
-            const widgetHeight = anglePickerWidget.offsetHeight;
-
-            let left = inputRect.left - widgetWidth - 10;
-            let top = inputRect.top + (inputRect.height / 2) - (widgetHeight / 2);
-
-            if (left < 5) { 
-                left = inputRect.left + (inputRect.width / 2) - (widgetWidth / 2);
-                top = inputRect.bottom + 5;
-            }
-             if (top < 5) top = 5;
-            if (top + widgetHeight > window.innerHeight) top = window.innerHeight - widgetHeight - 5;
-            
-            anglePickerWidget.style.left = `${left}px`;
-            anglePickerWidget.style.top = `${top}px`;
-
-            const currentAngleRad = (sprite.direction - 90) * Math.PI / 180;
-            anglePickerHandle.style.transform = `rotate(${currentAngleRad}rad)`;
-            
-            const onAngleDrag = (moveEvent) => {
-                moveEvent.preventDefault();
-                const dialRect = anglePickerDial.getBoundingClientRect();
-                const centerX = dialRect.left + dialRect.width / 2;
-                const centerY = dialRect.top + dialRect.height / 2;
-                const pointer = moveEvent.touches ? moveEvent.touches[0] : moveEvent;
-                const angleRad = Math.atan2(pointer.clientY - centerY, pointer.clientX - centerX);
-                let angleDeg = angleRad * 180 / Math.PI;
-
-                let newDirection = Math.round(angleDeg + 90);
-                if (newDirection < 0) newDirection += 360;
-
-                sprite.direction = newDirection;
-                propDirection.value = newDirection;
-                anglePickerHandle.style.transform = `rotate(${angleRad}rad)`;
-                window.refreshSprite(sprite);
-            };
-
-            const onAngleDragEnd = () => {
-                document.removeEventListener('mousemove', onAngleDrag);
-                document.removeEventListener('mouseup', onAngleDragEnd);
-                document.removeEventListener('touchmove', onAngleDrag);
-                document.removeEventListener('touchend', onAngleDragEnd);
-            };
-
-            anglePickerDial.addEventListener('mousedown', (downEvent) => {
-                onAngleDrag(downEvent); // Set initial angle
-                document.addEventListener('mousemove', onAngleDrag);
-                document.addEventListener('mouseup', onAngleDragEnd, { once: true });
-            });
-            anglePickerDial.addEventListener('touchstart', (downEvent) => {
-                onAngleDrag(downEvent); // Set initial angle
-                document.addEventListener('touchmove', onAngleDrag, { passive: false });
-                document.addEventListener('touchend', onAngleDragEnd, { once: true });
-            }, { passive: false });
-            
-            // Hide on next click anywhere
-            const hideOnClickOutside = (event) => {
-                if (!anglePickerWidget.contains(event.target) && event.target !== propDirection) {
-                    anglePickerWidget.style.display = 'none';
-                    document.removeEventListener('click', hideOnClickOutside, true);
-                }
-            };
-            setTimeout(() => document.addEventListener('click', hideOnClickOutside, true), 0);
+            openAnglePicker();
         });
 
         propShow.addEventListener('click', () => {
