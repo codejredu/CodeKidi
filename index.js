@@ -916,17 +916,31 @@ document.addEventListener('DOMContentLoaded', () => {
         if (newDirection < 0) newDirection += 360;
     
         sprite.direction = newDirection;
-        propDirection.value = newDirection; // Update input field
+        
+        // Update input field only if the target sprite is still active
+        if (anglePickerTargetSpriteId === activeSpriteId) {
+            propDirection.value = newDirection;
+        }
+
         anglePickerHandle.style.transform = `rotate(${angleRad}rad)`;
         window.refreshSprite(sprite);
     };
     
     const stopAnglePickerDrag = () => {
-        isAnglePickerDragging = false;
         document.removeEventListener('mousemove', handleAnglePickerDrag);
         document.removeEventListener('mouseup', stopAnglePickerDrag);
         document.removeEventListener('touchmove', handleAnglePickerDrag);
         document.removeEventListener('touchend', stopAnglePickerDrag);
+    };
+
+    const cleanupAnglePicker = () => {
+        stopAnglePickerDrag(); // Stop any active drag
+        anglePickerDial.removeEventListener('mousedown', handleAnglePickerMouseDown);
+        anglePickerDial.removeEventListener('touchstart', handleAnglePickerTouchStart);
+        document.removeEventListener('click', hideAnglePickerOnClickOutside, true);
+        anglePickerWidget.style.display = 'none';
+        anglePickerTargetSpriteId = null;
+        isAnglePickerDragging = false; // CRITICAL: Reset the flag
     };
     
     const handleAnglePickerMouseDown = (downEvent) => {
@@ -945,32 +959,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function hideAnglePickerOnClickOutside(event) {
         if (!anglePickerWidget.contains(event.target) && event.target !== propDirection) {
-            closeAnglePicker();
+            cleanupAnglePicker();
         }
-    }
-    
-    function closeAnglePicker() {
-        if (anglePickerWidget.style.display === 'none') return;
-        
-        stopAnglePickerDrag();
-        anglePickerDial.removeEventListener('mousedown', handleAnglePickerMouseDown);
-        anglePickerDial.removeEventListener('touchstart', handleAnglePickerTouchStart);
-        document.removeEventListener('click', hideAnglePickerOnClickOutside, true);
-    
-        anglePickerWidget.style.display = 'none';
-        anglePickerTargetSpriteId = null;
-        isAnglePickerDragging = false; // Ensure flag is reset
     }
     
     function openAnglePicker() {
         const sprite = getActiveSprite();
         if (!sprite) return;
     
+        // If one is already open, clean it up completely before opening a new one
         if (anglePickerWidget.style.display !== 'none') {
-            closeAnglePicker();
+            cleanupAnglePicker();
         }
         
-        anglePickerTargetSpriteId = sprite.id;
+        anglePickerTargetSpriteId = sprite.id; // "Lock" the picker to this sprite
     
         anglePickerWidget.style.display = 'flex';
         const inputRect = propDirection.getBoundingClientRect();
@@ -996,11 +998,12 @@ document.addEventListener('DOMContentLoaded', () => {
         anglePickerDial.addEventListener('mousedown', handleAnglePickerMouseDown);
         anglePickerDial.addEventListener('touchstart', handleAnglePickerTouchStart, { passive: false });
     
+        // Use a timeout to ensure this listener is added after the current click event stack is cleared
         setTimeout(() => document.addEventListener('click', hideAnglePickerOnClickOutside, true), 0);
     }
     
     const setActiveSprite = (spriteId) => {
-        closeAnglePicker(); // Close angle picker whenever the active sprite changes.
+        cleanupAnglePicker(); // Always close and clean up the picker on sprite change.
         
         if (activeSpriteId === spriteId) return;
 
@@ -3383,10 +3386,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         propDirection.addEventListener('input', (e) => {
-            // Prevent this listener from firing during a drag operation from the angle picker
-            if (isAnglePickerDragging) return;
             const sprite = getActiveSprite();
-            if (sprite) {
+            if (sprite && !isAnglePickerDragging) {
                 sprite.direction = Number(e.target.value);
                 window.refreshSprite(sprite);
             }
