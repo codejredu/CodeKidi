@@ -2995,7 +2995,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                       rect1.top > rect2.bottom);
                 
                 if (isColliding) {
-                    const collisionKey = [id1, id2].sort().join('-');
+                    const collisionKey = [id1, id2].sort().join('|');
                     newCollisionPairs.add(collisionKey);
                 }
             }
@@ -3005,7 +3005,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (const key of newCollisionPairs) {
             if (!collisionState.has(key)) {
                 log(`Collision started: ${key}`);
-                const [id1, id2] = key.split('-');
+                const [id1, id2] = key.split('|');
                 triggerBumpScripts(id1, id2);
             }
         }
@@ -3019,7 +3019,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const scriptsToRun = [];
     
         const findAndQueueScripts = (spriteToCheck, otherSpriteId) => {
-            if (!spriteToCheck.workspaceXml) return;
+            if (!spriteToCheck || !spriteToCheck.workspaceXml) return;
             const tempWorkspace = new Blockly.Workspace();
             try {
                 Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(spriteToCheck.workspaceXml), tempWorkspace);
