@@ -1,4 +1,5 @@
 
+
 import { initCharacterCreator } from './Caracter.js';
 import soundUIController from './sound-ui.js';
 
@@ -265,6 +266,41 @@ document.addEventListener('DOMContentLoaded', () => {
         const yOffset = 3; // Pixels to shift down for better alignment
         this.imageElement_.setAttribute('transform', `translate(0, ${yOffset})`);
     };
+    
+    // --- Custom Field for Motion Block Rotation Style ---
+    const ROTATION_ICONS_YELLOW = {
+        'all-around': `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="yellow" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /><path stroke-linecap="round" stroke-linejoin="round" d="M23 4v6h-6" /></svg>`,
+        'left-right': `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="yellow" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18m-7 4l4-4m0 0l-4-4m4 4H3" /></svg>`,
+        'dont-rotate': `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="yellow" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 3h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`,
+    };
+    const ROTATION_ICONS_WHITE = {
+        'all-around': `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /><path stroke-linecap="round" stroke-linejoin="round" d="M23 4v6h-6" /></svg>`,
+        'left-right': `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18m-7 4l4-4m0 0l-4-4m4 4H3" /></svg>`,
+        'dont-rotate': `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 3h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`,
+    };
+
+    class FieldRotationStyle extends Blockly.FieldDropdown {
+        initView() {
+            super.initView();
+            this.updateImageView_();
+        }
+        doValueUpdate_(newValue) {
+            super.doValueUpdate_(newValue);
+            this.updateImageView_();
+        }
+        updateImageView_() {
+            if (this.value_ && this.imageElement_) {
+                const whiteIconSrc = ROTATION_ICONS_WHITE[this.value_];
+                if (whiteIconSrc) {
+                    this.imageElement_.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', whiteIconSrc);
+                }
+                 if (this.textElement_) {
+                    this.textElement_.style.display = 'none';
+                }
+            }
+        }
+    }
+    Blockly.fieldRegistry.register('field_rotation_style', FieldRotationStyle);
 
     // --- Main Application Elements ---
     const stageArea = document.getElementById('stage-area');
@@ -1016,7 +1052,17 @@ document.addEventListener('DOMContentLoaded', () => {
         soundUIController.renderSpriteSounds(newSprite);
         refreshVisibleBumpBlocks();
         
-        // 7. Refresh toolbox to update dynamic fields (like sounds)
+        // 7. Sync blocks to new sprite state
+        if (newSprite) {
+            const blocks = workspace.getAllBlocks(false);
+            blocks.forEach(block => {
+                if (block.type === 'motion_set_direction') {
+                    block.setFieldValue(newSprite.rotationStyle || 'all-around', 'ROTATION_STYLE');
+                }
+            });
+        }
+
+        // 8. Refresh toolbox to update dynamic fields (like sounds)
         workspace.refreshToolboxSelection();
 
         log(`Active sprite is now: ${newSprite.name}`);
@@ -1574,24 +1620,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 return newValue;
             };
 
+            const rotationStyleValidator = (newValue) => {
+                const sprite = getActiveSprite();
+                if (sprite && sprite.rotationStyle !== newValue) {
+                    sprite.rotationStyle = newValue;
+                    window.refreshSprite(sprite);
+                }
+                return newValue;
+            };
+            
+            const getRotationStyleOptions = () => {
+                return [
+                    [{ src: ROTATION_ICONS_YELLOW['all-around'], width: 24, height: 24, alt: 'All Around' }, 'all-around'],
+                    [{ src: ROTATION_ICONS_YELLOW['left-right'], width: 24, height: 24, alt: 'Left-Right' }, 'left-right'],
+                    [{ src: ROTATION_ICONS_YELLOW['dont-rotate'], width: 24, height: 24, alt: "Don't Rotate" }, 'dont-rotate']
+                ];
+            };
+
             this.appendDummyInput()
                 .appendField(new Blockly.FieldImage("https://codejredu.github.io/test/assets/blocklyicon/compass.svg", 34, 34, { alt: "compass icon", flipRtl: false }))
                 .appendField(new Blockly.FieldAngle('90', angleValidator), 'DEGREES')
-                .appendField('\u00A0\u00A0\u00A0\u00A0\u00A0');
+                .appendField(new FieldRotationStyle(getRotationStyleOptions, rotationStyleValidator), 'ROTATION_STYLE');
             this.setInputsInline(true);
             this.setPreviousStatement(true, null);
             this.setNextStatement(true, null);
             this.setColour("#4C97FF");
-            this.setTooltip("Set the direction of the sprite.");
+            this.setTooltip("Set the direction and rotation style of the sprite.");
         }
     };
     Blockly.JavaScript['motion_set_direction'] = function(block) {
         const degrees = block.getFieldValue('DEGREES');
+        const rotationStyle = block.getFieldValue('ROTATION_STYLE');
         return `
             if (sprite) {
                 sprite.direction = Number(${degrees});
+                sprite.rotationStyle = '${rotationStyle}';
                 window.refreshSprite(sprite);
-                log(sprite.name + ' set direction to ' + sprite.direction + ' degrees.');
+                log(sprite.name + ' set direction to ' + sprite.direction + ' and rotation to ${rotationStyle}.');
             }
             yield;
         `;
@@ -2293,14 +2358,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return `yield;`;
         }
     
+        const blockId = block.id.replace(/[^a-zA-Z0-9]/g, '_');
+        const promiseVar = `soundPromise_${blockId}`;
+        const flagVar = `soundFlag_${blockId}`;
+
         return `
             if (sprite) {
                 log('Playing sound: ${soundUrl}');
-                const soundPromise = soundUIController.soundManager.playSound('${soundId}');
-                let soundHasFinished = false;
-                soundPromise.then(() => { soundHasFinished = true; });
-    
-                while (!soundHasFinished) {
+                let ${flagVar} = false;
+                const ${promiseVar} = soundUIController.soundManager.playSound('${soundId}');
+                ${promiseVar}.then(() => { ${flagVar} = true; });
+
+                while (!${flagVar}) {
                     if (getExecutionCancelled()) {
                         // We can't easily stop the sound here without more complex logic,
                         // but we can stop waiting for it.
@@ -2741,7 +2810,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
     function saveActiveSpriteWorkspace() {
          if (activeSpriteId && sprites[activeSpriteId]) {
             const dom = Blockly.Xml.workspaceToDom(workspace);
@@ -2894,6 +2962,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const spriteIds = Object.keys(sprites);
         if (spriteIds.length < 2) return;
 
+        const newCollisionPairs = new Set();
+
         for (let i = 0; i < spriteIds.length; i++) {
             for (let j = i + 1; j < spriteIds.length; j++) {
                 const id1 = spriteIds[i];
@@ -2912,42 +2982,54 @@ document.addEventListener('DOMContentLoaded', () => {
                                       rect1.bottom < rect2.top || 
                                       rect1.top > rect2.bottom);
                 
-                const collisionKey = [id1, id2].sort().join('-');
-
                 if (isColliding) {
-                    if (!collisionState.has(collisionKey)) {
-                        collisionState.add(collisionKey);
-                        log(`Collision started between ${sprites[id1].name} and ${sprites[id2].name}`);
-                        triggerBumpScripts(id1, id2);
-                    }
-                } else {
-                    if (collisionState.has(collisionKey)) {
-                        collisionState.delete(collisionKey);
-                        log(`Collision ended between ${sprites[id1].name} and ${sprites[id2].name}.`);
-                    }
+                    const collisionKey = [id1, id2].sort().join('-');
+                    newCollisionPairs.add(collisionKey);
                 }
             }
         }
+
+        // Find collisions that just started
+        for (const key of newCollisionPairs) {
+            if (!collisionState.has(key)) {
+                log(`Collision started: ${key}`);
+                const [id1, id2] = key.split('-');
+                triggerBumpScripts(id1, id2);
+            }
+        }
+
+        // Update the global collision state
+        collisionState = newCollisionPairs;
     }
 
     function triggerBumpScripts(id1, id2) {
         saveActiveSpriteWorkspace();
         const scriptsToRun = [];
-
-        const findScriptsForSprite = (spriteToCheck, otherSpriteId) => {
+    
+        const findAndQueueScripts = (spriteToCheck, otherSpriteId) => {
             if (!spriteToCheck.workspaceXml) return;
             const tempWorkspace = new Blockly.Workspace();
             try {
                 Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(spriteToCheck.workspaceXml), tempWorkspace);
-                const bumpScripts = tempWorkspace.getTopBlocks(true).filter(block => 
+                const bumpScripts = tempWorkspace.getTopBlocks(true).filter(block =>
                     block.type === 'event_when_bump' && block.getNextBlock()
                 );
-                
+    
                 bumpScripts.forEach(scriptBlock => {
                     const targetSpriteId = scriptBlock.getFieldValue('TARGET_SPRITE');
                     if (targetSpriteId === 'ANY' || targetSpriteId === otherSpriteId) {
                         const generator = createGeneratorForStack(scriptBlock, spriteToCheck);
-                        if (generator) scriptsToRun.push(generator);
+                        if (generator) {
+                            // Wrap the generator to ensure the entire script runs.
+                            const wrappedGenerator = (function* () {
+                                let result = generator.next();
+                                while (!result.done) {
+                                    yield; // Yield control to the runner for one frame
+                                    result = generator.next();
+                                }
+                            })();
+                            scriptsToRun.push(wrappedGenerator);
+                        }
                     }
                 });
             } catch (e) {
@@ -2956,10 +3038,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 tempWorkspace.dispose();
             }
         };
-
-        findScriptsForSprite(sprites[id1], id2);
-        findScriptsForSprite(sprites[id2], id1); // Check the other sprite as well
-
+    
+        findAndQueueScripts(sprites[id1], id2);
+        findAndQueueScripts(sprites[id2], id1);
+    
         if (scriptsToRun.length > 0) {
             if (!scriptRunner || !scriptRunner.isRunning) {
                 scriptRunner = new ScriptRunner(stopAllScripts);
@@ -3406,6 +3488,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (sprite) {
                 sprite.rotationStyle = style;
                 window.refreshSprite(sprite);
+                // Sync to any visible 'set_direction' blocks in the workspace
+                if (workspace) {
+                    const blocks = workspace.getAllBlocks(false);
+                    blocks.forEach(block => {
+                        if (block.type === 'motion_set_direction') {
+                            block.setFieldValue(style, 'ROTATION_STYLE');
+                        }
+                    });
+                }
             }
         };
 
