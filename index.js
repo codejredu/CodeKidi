@@ -1,5 +1,4 @@
-
-
+// This file is intentionally left blank for future use.
 import { initCharacterCreator } from './Caracter.js';
 import soundUIController from './sound-ui.js';
 
@@ -1611,22 +1610,16 @@ document.addEventListener('DOMContentLoaded', () => {
     
     Blockly.Blocks['motion_set_direction'] = {
         init: function() {
+            // Validator now just validates, no side-effects
             const angleValidator = (newValue) => {
-                 if (getActiveSprite()) {
-                    let sprite = getActiveSprite();
-                    sprite.direction = Number(newValue);
-                    window.refreshSprite(sprite);
-                }
-                return newValue;
+                const n = parseFloat(newValue);
+                return isNaN(n) ? null : String(n);
             };
 
+            // Validator now just validates, no side-effects
             const rotationStyleValidator = (newValue) => {
-                const sprite = getActiveSprite();
-                if (sprite && sprite.rotationStyle !== newValue) {
-                    sprite.rotationStyle = newValue;
-                    window.refreshSprite(sprite);
-                }
-                return newValue;
+                const validStyles = ['all-around', 'left-right', 'dont-rotate'];
+                return validStyles.includes(newValue) ? newValue : null;
             };
             
             const getRotationStyleOptions = () => {
@@ -2524,6 +2517,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     workspace.addChangeListener((event) => {
+        if (event.type === Blockly.Events.BLOCK_CHANGE) {
+            // Check if the change happened in the main workspace, not the flyout
+            const block = workspace.getBlockById(event.blockId);
+            if (block && !block.isInFlyout) {
+                const sprite = getActiveSprite();
+                if (sprite && block.type === 'motion_set_direction') {
+                    if (event.name === 'DEGREES' && sprite.direction !== event.newValue) {
+                        sprite.direction = Number(event.newValue);
+                        window.refreshSprite(sprite);
+                    }
+                    if (event.name === 'ROTATION_STYLE' && sprite.rotationStyle !== event.newValue) {
+                        sprite.rotationStyle = event.newValue;
+                        window.refreshSprite(sprite);
+                    }
+                }
+            }
+        }
+
+
         // UI events are for things like opening the toolbox, dragging blocks, etc.
         if (event.isUiEvent) {
              if (event.type === Blockly.Events.BLOCK_MOVE) {
