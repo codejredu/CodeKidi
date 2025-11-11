@@ -1,6 +1,6 @@
 
-
 import { initCharacterCreator } from './Caracter.js';
+import soundUIController from './sound-ui.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // START OF CUSTOM TOOLBOX RRENDERER
@@ -317,29 +317,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const soundGallery = document.getElementById('sound-gallery');
     const allGalleries = [spriteGallery, backgroundGallery, soundGallery];
 
-    // --- Sound System Elements ---
-    const soundsList = document.getElementById('sounds-list');
-    const addSoundButton = document.getElementById('add-sound-button');
-    const uploadSoundHeaderButton = document.getElementById('upload-sound-header-button');
-    const recordSoundHeaderButton = document.getElementById('record-sound-header-button');
-    const closeSoundGalleryButton = document.getElementById('close-sound-gallery-button');
-    const soundGalleryGrid = document.getElementById('sound-gallery-grid');
-    const addSelectedSoundsButton = document.getElementById('add-selected-sounds-button');
-    const soundUploadInput = document.getElementById('sound-upload-input');
-    const soundRecorderModal = document.getElementById('sound-recorder-modal');
-    const recorderCloseBtn = document.getElementById('recorder-close-btn');
-    const recorderVisualizer = document.getElementById('recorder-visualizer');
-    const recorderTimer = document.getElementById('recorder-timer');
-    const recorderRecordBtn = document.getElementById('recorder-record-btn');
-    const recorderStopBtn = document.getElementById('recorder-stop-btn');
-    const recorderRerecordBtn = document.getElementById('recorder-rerecord-btn');
-    const recorderSaveBtn = document.getElementById('recorder-save-btn');
-    const recorderMessage = document.getElementById('recorder-message');
-    const recorderUIContent = document.getElementById('recorder-ui-content');
-    const recorderAudioPreview = document.getElementById('recorder-audio-preview');
-    const recorderPreviewContainer = document.getElementById('recorder-preview-container');
-    const recorderSoundName = document.getElementById('recorder-sound-name');
-    
     // --- Application State ---
     const STAGE_WIDTH = 480;
     const STAGE_HEIGHT = 360;
@@ -354,15 +331,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let nextZIndex = 10;
     // Make frameDeltaTime accessible globally so the generated code can see it.
     window.frameDeltaTime = 1000 / 60; // Time in ms for one frame at 60fps.
-    
-    // --- Sound System State ---
-    let currentPreviewAudio = null;
-    let selectedSoundsForAdd = new Set();
-    let mediaRecorder = null;
-    let audioChunks = [];
-    let mediaStream = null;
-    let recorderTimerInterval = null;
-    let recordedBlob = null;
     
     // --- Script Copy Drag/Drop State ---
     let isDraggingForCopy = false;
@@ -845,7 +813,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setActiveSprite(firstSpriteId);
             } else {
                 updatePropertiesPanel();
-                renderSpriteSounds(null);
+                soundUIController.renderSpriteSounds(null);
                 refreshVisibleBumpBlocks();
             }
         } else {
@@ -1045,7 +1013,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 6. Update properties panel and sounds list
         updatePropertiesPanel();
-        renderSpriteSounds(newSprite);
+        soundUIController.renderSpriteSounds(newSprite);
         refreshVisibleBumpBlocks();
         
         // 7. Refresh toolbox to update dynamic fields (like sounds)
@@ -2317,27 +2285,33 @@ document.addEventListener('DOMContentLoaded', () => {
     Blockly.JavaScript['sound_play_until_done'] = function(block) {
         const soundUrl = block.getFieldValue('SOUND');
         if (!soundUrl || soundUrl === 'NONE') return '';
-        
-        const safeUrl = soundUrl.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    
+        const soundId = soundUIController.soundManager.getAllSounds().find(s => s.url === soundUrl)?.id;
+        if (!soundId) {
+             // This case is unlikely if the dropdown is populated correctly, but it's a good safeguard.
+            console.warn(`Could not find sound ID for URL: ${soundUrl}`);
+            return `yield;`;
+        }
+    
         return `
-            log('Playing sound: ${safeUrl}');
-            const audio = new Audio('${safeUrl}');
-            let soundEnded = false;
-            const endListener = () => { soundEnded = true; };
-            audio.addEventListener('ended', endListener);
-            audio.addEventListener('error', endListener);
-            audio.play().catch(e => { console.error('Audio play failed:', e); soundEnded = true; });
-            
-            while (!soundEnded) {
-                if (getExecutionCancelled()) {
-                    audio.pause();
-                    audio.removeEventListener('ended', endListener);
-                    audio.removeEventListener('error', endListener);
-                    break;
+            if (sprite) {
+                log('Playing sound: ${soundUrl}');
+                const soundPromise = soundUIController.soundManager.playSound('${soundId}');
+                let soundHasFinished = false;
+                soundPromise.then(() => { soundHasFinished = true; });
+    
+                while (!soundHasFinished) {
+                    if (getExecutionCancelled()) {
+                        // We can't easily stop the sound here without more complex logic,
+                        // but we can stop waiting for it.
+                        break;
+                    }
+                    yield;
                 }
-                yield;
+                if (!getExecutionCancelled()) {
+                    log('Sound finished.');
+                }
             }
-            log('Sound finished.');
         `;
     };
 
@@ -2583,9 +2557,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // The generated code will access window.frameDeltaTime, which is updated every tick.
         const GeneratorFunction = Object.getPrototypeOf(function*(){}).constructor;
-        const func = new GeneratorFunction('sprite', 'log', 'getExecutionCancelled', 'window', code);
+        const func = new GeneratorFunction('sprite', 'log', 'getExecutionCancelled', 'window', 'soundUIController', code);
         
-        return func(sprite, log, getExecutionCancelled, window);
+        return func(sprite, log, getExecutionCancelled, window, soundUIController);
     }
 
     function runScriptStack(startBlock) {
@@ -2621,9 +2595,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!code) return null;
 
         const GeneratorFunction = Object.getPrototypeOf(function*(){}).constructor;
-        const func = new GeneratorFunction('sprite', 'log', 'getExecutionCancelled', 'window', code);
+        const func = new GeneratorFunction('sprite', 'log', 'getExecutionCancelled', 'window', 'soundUIController', code);
         
-        return func(sprite, log, getExecutionCancelled, window);
+        return func(sprite, log, getExecutionCancelled, window, soundUIController);
     }
     
     function runScriptFromBlock(startBlock) {
@@ -2943,13 +2917,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (isColliding) {
                     if (!collisionState.has(collisionKey)) {
                         collisionState.add(collisionKey);
-                        log(`Collision between ${sprites[id1].name} and ${sprites[id2].name}`);
+                        log(`Collision started between ${sprites[id1].name} and ${sprites[id2].name}`);
                         triggerBumpScripts(id1, id2);
                     }
                 } else {
                     if (collisionState.has(collisionKey)) {
                         collisionState.delete(collisionKey);
-                        log(`${sprites[id1].name} and ${sprites[id2].name} separated.`);
+                        log(`Collision ended between ${sprites[id1].name} and ${sprites[id2].name}.`);
                     }
                 }
             }
@@ -2958,7 +2932,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function triggerBumpScripts(id1, id2) {
         saveActiveSpriteWorkspace();
-        
         const scriptsToRun = [];
 
         const findScriptsForSprite = (spriteToCheck, otherSpriteId) => {
@@ -2978,14 +2951,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             } catch (e) {
-                console.error("Error processing bump script workspace", e);
+                console.error("Error processing bump script workspace for " + spriteToCheck.name, e);
             } finally {
                 tempWorkspace.dispose();
             }
         };
 
         findScriptsForSprite(sprites[id1], id2);
-        findScriptsForSprite(sprites[id2], id2);
+        findScriptsForSprite(sprites[id2], id1); // Check the other sprite as well
 
         if (scriptsToRun.length > 0) {
             if (!scriptRunner || !scriptRunner.isRunning) {
@@ -3065,10 +3038,7 @@ document.addEventListener('DOMContentLoaded', () => {
             sprite.isJumping = false; // Fail-safe to reset jump state for all sprites
         });
 
-        if (currentPreviewAudio) {
-            currentPreviewAudio.pause();
-            currentPreviewAudio = null;
-        }
+        soundUIController.stopPreview();
 
         updatePropertiesPanel(); // To update play/pause button state
         
@@ -3294,7 +3264,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isLoadingProject = true; // Set flag before loading
 
         const reader = new FileReader();
-        reader.onload = (event) => {
+        reader.onload = async (event) => {
             try {
                 const projectData = JSON.parse(event.target.result);
 
@@ -3330,6 +3300,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 nextZIndex = maxZ + 1;
                 
+                // Create a list of all unique sounds from all sprites to load into the manager
+                const allSoundsToLoad = [];
+                const uniqueSoundUrls = new Set();
+                Object.values(projectData.sprites).forEach(spriteData => {
+                    if (spriteData.sounds) {
+                        spriteData.sounds.forEach(sound => {
+                            if (sound && sound.url && !uniqueSoundUrls.has(sound.url)) {
+                                uniqueSoundUrls.add(sound.url);
+                                allSoundsToLoad.push(sound);
+                            }
+                        });
+                    }
+                });
+
+                // Load all sounds into the manager concurrently
+                await Promise.all(allSoundsToLoad.map(sound => soundUIController.soundManager.addSound(sound)));
+
                 const firstSpriteId = Object.keys(projectData.sprites)[0];
                 if (firstSpriteId) {
                     setActiveSprite(firstSpriteId);
@@ -3455,15 +3442,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function setupGalleryListeners() {
         document.getElementById('add-sprite-button').addEventListener('click', () => openGallery(spriteGallery));
         document.getElementById('add-backdrop-button').addEventListener('click', () => openGallery(backgroundGallery));
-        document.getElementById('add-sound-button').addEventListener('click', () => {
-            selectedSoundsForAdd.clear();
-            updateSoundGallerySelection();
-            openGallery(soundGallery);
-        });
 
         document.getElementById('close-sprite-gallery-button').addEventListener('click', () => spriteGallery.classList.remove('visible'));
         document.getElementById('close-gallery-button').addEventListener('click', () => backgroundGallery.classList.remove('visible'));
-        closeSoundGalleryButton.addEventListener('click', () => soundGallery.classList.remove('visible'));
 
         document.getElementById('sprite-thumbnails-grid').addEventListener('click', handleSpriteGallerySelection);
         document.getElementById('thumbnails-grid').addEventListener('click', handleGallerySelection);
@@ -3575,245 +3556,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.drawImage(tempCanvas, frame.left, frame.top);
     }
     
-    function createSoundCard(sound) {
-        const card = document.createElement('div');
-        card.className = 'sound-card';
-        card.dataset.url = sound.url;
-        card.innerHTML = `
-            <div class="delete-button">X</div>
-            <svg class="sound-card-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10 2a.75.75 0 01.75.75v14.5a.75.75 0 01-1.5 0V2.75A.75.75 0 0110 2zM4.5 5.25a.75.75 0 000 1.5h1.014a2.5 2.5 0 012.236 2.236v1.014a.75.75 0 001.5 0V9.014A2.5 2.5 0 0111.986 6.75h1.014a.75.75 0 000-1.5H4.5z" />
-            </svg>
-            <div class="sound-card-name" title="${sound.name}">${sound.name}</div>
-        `;
-        
-        card.addEventListener('click', () => {
-             if (currentPreviewAudio) {
-                currentPreviewAudio.pause();
-                if (currentPreviewAudio.src === sound.url) {
-                    currentPreviewAudio = null;
-                    return;
-                }
-            }
-            currentPreviewAudio = new Audio(sound.url);
-            currentPreviewAudio.play();
-        });
-        
-        card.querySelector('.delete-button').addEventListener('click', (e) => {
-            e.stopPropagation();
-            const sprite = getActiveSprite();
-            if (sprite) {
-                sprite.sounds = sprite.sounds.filter(s => s.url !== sound.url);
-                renderSpriteSounds(sprite);
-                workspace.refreshToolboxSelection();
-            }
-        });
-        
-        return card;
-    }
-
-    function renderSpriteSounds(sprite) {
-        soundsList.innerHTML = '';
-        if (sprite && sprite.sounds) {
-            sprite.sounds.forEach(sound => {
-                soundsList.appendChild(createSoundCard(sound));
-            });
-        }
-    }
-    
-    function updateSoundGallerySelection() {
-        soundGalleryGrid.querySelectorAll('.sound-thumbnail').forEach(thumb => {
-            const checkbox = thumb.querySelector('.sound-thumbnail-checkbox');
-            const isSelected = selectedSoundsForAdd.has(thumb.dataset.url);
-            checkbox.checked = isSelected;
-            thumb.classList.toggle('selected-for-add', isSelected);
-        });
-    }
-
-    function handleSoundUpload(files) {
-        if (!files.length) return;
-        const sprite = getActiveSprite();
-        if (!sprite) return;
-
-        Array.from(files).forEach(file => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const name = file.name.replace(/\.[^/.]+$/, "");
-                const url = e.target.result;
-                if (!sprite.sounds.some(s => s.name === name)) {
-                    sprite.sounds.push({ name, url });
-                }
-                renderSpriteSounds(sprite);
-                workspace.refreshToolboxSelection();
-            };
-            reader.readAsDataURL(file);
-        });
-        soundUploadInput.value = '';
-    }
-    
-    function openSoundRecorder() {
-        resetRecorderState();
-        navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(stream => {
-                mediaStream = stream;
-                soundRecorderModal.classList.remove('hidden');
-            })
-            .catch(err => {
-                showRecorderError("Microphone access denied. Please allow microphone access in your browser settings.");
-                console.error("Microphone access error:", err);
-            });
-    }
-    
-    function closeSoundRecorder() {
-        if (mediaStream) {
-            mediaStream.getTracks().forEach(track => track.stop());
-            mediaStream = null;
-        }
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-            mediaRecorder.stop();
-        }
-        soundRecorderModal.classList.add('hidden');
-    }
-
-    function showRecorderError(message) {
-        recorderMessage.textContent = message;
-        recorderMessage.classList.remove('hidden');
-        recorderUIContent.classList.add('hidden');
-    }
-    
-    function resetRecorderState() {
-        recorderMessage.classList.add('hidden');
-        recorderUIContent.classList.remove('hidden');
-        recorderRecordBtn.classList.remove('hidden');
-        recorderStopBtn.classList.add('hidden');
-        recorderRerecordBtn.classList.add('hidden');
-        recorderSaveBtn.classList.add('hidden');
-        recorderPreviewContainer.classList.add('hidden');
-        recorderTimer.textContent = '0.0 / 15.0';
-        recorderVisualizer.classList.remove('is-recording');
-        if(recorderTimerInterval) clearInterval(recorderTimerInterval);
-        audioChunks = [];
-        recordedBlob = null;
-    }
-
-    function startRecording() {
-        mediaRecorder = new MediaRecorder(mediaStream);
-        mediaRecorder.start();
-        
-        recorderVisualizer.classList.add('is-recording');
-        recorderRecordBtn.classList.add('hidden');
-        recorderStopBtn.classList.remove('hidden');
-        
-        let startTime = Date.now();
-        recorderTimerInterval = setInterval(() => {
-            const seconds = ((Date.now() - startTime) / 1000);
-            recorderTimer.textContent = `${seconds.toFixed(1)} / 15.0`;
-            if (seconds >= 15) stopRecording();
-        }, 100);
-        
-        mediaRecorder.addEventListener("dataavailable", event => {
-            audioChunks.push(event.data);
-        });
-        
-        mediaRecorder.addEventListener("stop", () => {
-             recordedBlob = new Blob(audioChunks, { type: 'audio/mp3' });
-             const audioUrl = URL.createObjectURL(recordedBlob);
-             recorderAudioPreview.src = audioUrl;
-             
-             recorderStopBtn.classList.add('hidden');
-             recorderRerecordBtn.classList.remove('hidden');
-             recorderSaveBtn.classList.remove('hidden');
-             recorderPreviewContainer.classList.remove('hidden');
-             recorderSoundName.value = `My Sound ${getActiveSprite()?.sounds.length + 1 || 1}`;
-        });
-    }
-    
-    function stopRecording() {
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-            mediaRecorder.stop();
-        }
-        recorderVisualizer.classList.remove('is-recording');
-        if(recorderTimerInterval) clearInterval(recorderTimerInterval);
-    }
-    
-    function saveRecording() {
-        const sprite = getActiveSprite();
-        if (!sprite || !recordedBlob) return;
-        
-        const name = recorderSoundName.value.trim() || 'Recorded Sound';
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            const url = event.target.result;
-            if (!sprite.sounds.some(s => s.name === name)) {
-                sprite.sounds.push({ name, url });
-                renderSpriteSounds(sprite);
-                workspace.refreshToolboxSelection();
-            }
-            closeSoundRecorder();
-        };
-        reader.readAsDataURL(recordedBlob);
-    }
-    
-    function setupSoundSystem() {
-        const soundFiles = [ 'boing', 'clap', 'drip', 'drum', 'fart', 'meow', 'pop', 'snap', 'ting', 'woosh' ];
-        soundFiles.forEach(name => {
-            const url = `https://codejredu.github.io/test/assets/sounds/${name}.mp3`;
-            const thumb = document.createElement('div');
-            thumb.className = 'sound-thumbnail';
-            thumb.dataset.url = url;
-            thumb.dataset.name = name;
-            thumb.innerHTML = `
-                <input type="checkbox" class="sound-thumbnail-checkbox">
-                <svg class="sound-thumbnail-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
-                </svg>
-                <div class="sound-thumbnail-name">${name}</div>
-            `;
-            soundGalleryGrid.appendChild(thumb);
-        });
-
-        soundGalleryGrid.addEventListener('click', (e) => {
-            const thumb = e.target.closest('.sound-thumbnail');
-            if (!thumb) return;
-            const checkbox = thumb.querySelector('.sound-thumbnail-checkbox');
-            if (e.target !== checkbox) {
-                checkbox.checked = !checkbox.checked;
-            }
-            
-            const url = thumb.dataset.url;
-            if (checkbox.checked) {
-                selectedSoundsForAdd.add(url);
-            } else {
-                selectedSoundsForAdd.delete(url);
-            }
-            updateSoundGallerySelection();
-        });
-
-        addSelectedSoundsButton.addEventListener('click', () => {
-            const sprite = getActiveSprite();
-            if (!sprite) return;
-            selectedSoundsForAdd.forEach(url => {
-                 if (!sprite.sounds.some(s => s.url === url)) {
-                    const name = soundGalleryGrid.querySelector(`[data-url="${url}"]`).dataset.name;
-                    sprite.sounds.push({ name, url });
-                 }
-            });
-            renderSpriteSounds(sprite);
-            workspace.refreshToolboxSelection();
-            soundGallery.classList.remove('visible');
-        });
-
-        uploadSoundHeaderButton.addEventListener('click', () => soundUploadInput.click());
-        soundUploadInput.addEventListener('change', (e) => handleSoundUpload(e.target.files));
-
-        recordSoundHeaderButton.addEventListener('click', openSoundRecorder);
-        recorderRecordBtn.addEventListener('click', startRecording);
-        recorderStopBtn.addEventListener('click', stopRecording);
-        recorderCloseBtn.addEventListener('click', closeSoundRecorder);
-        recorderRerecordBtn.addEventListener('click', resetRecorderState);
-        recorderSaveBtn.addEventListener('click', saveRecording);
-    }
-
     function gameLoop(timestamp) {
         if (!lastTimestamp) {
             lastTimestamp = timestamp;
@@ -3850,7 +3592,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function init() {
         setupPropertiesPanelListeners();
         setupGalleryListeners();
-        setupSoundSystem();
+        
+        soundUIController.init({
+            getActiveSprite,
+            workspace,
+            openGallery,
+        });
         
         window.characterCreator = initCharacterCreator({
             onSave: ({ name, dataUrl, characterData, editingSpriteId }) => {
