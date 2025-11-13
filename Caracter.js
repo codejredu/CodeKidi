@@ -235,7 +235,7 @@ class CharacterCreator {
 
         this.canvas.addEventListener('mousedown', (e) => this.handleCanvasMouseDown(e));
         this.canvas.addEventListener('mousemove', (e) => this.handleCanvasMouseMove(e));
-        document.addEventListener('mouseup', () => this.handleCanvasMouseUp());
+        document.addEventListener('mouseup', (e) => this.handleCanvasMouseUp(e));
         this.canvas.addEventListener('mouseleave', () => this.handleCanvasMouseLeave());
     }
     
@@ -764,8 +764,8 @@ class CharacterCreator {
         this.draw();
     }
     
-    handleCanvasMouseUp() {
-        if (this.action.type !== 'none') {
+    handleCanvasMouseUp(event) {
+        if (this.action.type !== 'none' && event) {
             const rect = this.canvas.getBoundingClientRect();
             const { clientX, clientY } = (event.touches ? event.touches[0] : event);
             const mouseX = clientX - rect.left;

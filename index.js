@@ -1,5 +1,6 @@
 // This file is intentionally left blank for future use.
 import { initCharacterCreator } from './Caracter.js';
+import { SpriteCenterEditor } from './center.js';
 import soundUIController from './sound-ui.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -364,6 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let scriptRunner = null;
     let lastTimestamp = 0;
     let nextZIndex = 10;
+    let centerEditor = null;
     // Make frameDeltaTime accessible globally so the generated code can see it.
     window.frameDeltaTime = 1000 / 60; // Time in ms for one frame at 60fps.
     
@@ -624,14 +626,12 @@ document.addEventListener('DOMContentLoaded', () => {
             let rotationTransform = '';
             switch(spriteData.rotationStyle) {
                 case 'left-right':
-                    // Normalize direction to [0, 360)
                     const normalizedDir = ((spriteData.direction % 360) + 360) % 360;
-                    // Face right for 0-179, face left for 180-359
                     const isFlipped = normalizedDir >= 180;
                     rotationTransform = isFlipped ? 'scaleX(-1)' : 'scaleX(1)';
                     break;
                 case 'dont-rotate':
-                    rotationTransform = ''; // No rotation at all
+                    rotationTransform = '';
                     break;
                 case 'all-around':
                 default:
@@ -640,11 +640,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             // --- End Rotation Logic ---
 
+            // --- Center Point Logic (NEW) ---
+            const centerX = spriteData.centerX || 0.5;
+            const centerY = spriteData.centerY || 0.5;
+            const translateX = -centerX * 100;
+            const translateY = -centerY * 100;
+            
+            wrapper.style.transformOrigin = `${centerX * 100}% ${centerY * 100}%`;
+            
             // Apply styles to the single wrapper
             wrapper.style.width = `${newSize}px`;
             wrapper.style.height = `${newSize}px`;
             wrapper.style.opacity = spriteData.opacity;
-            wrapper.style.transform = `translate(-50%, -50%) ${rotationTransform}`;
+            // Updated transform
+            wrapper.style.transform = `translate(${translateX}%, ${translateY}%) ${rotationTransform}`;
             
             // Position the main container which holds the wrapper
             container.style.transform = `translate(${stageX}px, ${stageY}px)`;
@@ -797,6 +806,8 @@ document.addEventListener('DOMContentLoaded', () => {
             sounds: [],
             isJumping: false,
             zIndex: nextZIndex++,
+            centerX: 0.5,
+            centerY: 0.5,
         };
         
         sprites[id] = spriteData;
@@ -3322,6 +3333,8 @@ document.addEventListener('DOMContentLoaded', () => {
         spriteData.isJumping = false; // Runtime state, always reset on load
         spriteData.zIndex = zIndex || nextZIndex++; // Use loaded zIndex or assign a new one
         spriteData.speed = spriteData.speed || 'instant';
+        spriteData.centerX = spriteData.centerX || 0.5;
+        spriteData.centerY = spriteData.centerY || 0.5;
         sprites[id] = spriteData;
 
         createAndAttachSpriteCard(spriteData);
@@ -3701,6 +3714,19 @@ document.addEventListener('DOMContentLoaded', () => {
             workspace,
             openGallery,
         });
+
+        centerEditor = new SpriteCenterEditor({
+            getActiveSprite: getActiveSprite,
+            updateSpriteCenter: (spriteId, centerX, centerY) => {
+                const sprite = sprites[spriteId];
+                if (sprite) {
+                    sprite.centerX = centerX;
+                    sprite.centerY = centerY;
+                    window.refreshSprite(sprite);
+                }
+            }
+        });
+        centerEditor.init();
         
         window.characterCreator = initCharacterCreator({
             onSave: ({ name, dataUrl, characterData, editingSpriteId }) => {
