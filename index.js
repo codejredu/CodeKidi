@@ -431,6 +431,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    window.changeSpriteLayer = (sprite, action) => {
+        if (!sprite) return;
+
+        const sortedSprites = Object.values(sprites).sort((a, b) => a.zIndex - b.zIndex);
+        const currentIndex = sortedSprites.findIndex(s => s.id === sprite.id);
+    
+        if (currentIndex === -1) return;
+    
+        // Reorder the array based on the action
+        const [removed] = sortedSprites.splice(currentIndex, 1); // remove the sprite from its current position
+        switch (action) {
+            case 'FORWARD':
+                // Insert it one position ahead, capped at the end
+                sortedSprites.splice(Math.min(currentIndex + 1, sortedSprites.length), 0, removed);
+                break;
+            case 'BACKWARD':
+                // Insert it one position behind, capped at the start
+                sortedSprites.splice(Math.max(currentIndex - 1, 0), 0, removed);
+                break;
+            case 'FRONT':
+                sortedSprites.push(removed); // Add to the end
+                break;
+            case 'BACK':
+                sortedSprites.unshift(removed); // Add to the beginning
+                break;
+        }
+    
+        // Re-assign z-indices based on the new order
+        const baseZIndex = 10;
+        sortedSprites.forEach((s, index) => {
+            s.zIndex = baseZIndex + index;
+        });
+    
+        // Update the appearance of all sprites on the stage
+        Object.values(sprites).forEach(s => window.refreshSprite(s));
+    };
+
     window.switchBackdrop = (url) => {
         if (!url || url === 'NONE') return;
         try {
