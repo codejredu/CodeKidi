@@ -1487,16 +1487,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (sprite) {
                 const halfWidth = ${STAGE_WIDTH / 2};
                 const halfHeight = ${STAGE_HEIGHT / 2};
-                const spriteLogicalWidth = 160 * (sprite.size / 100);
-                const spriteLogicalHeight = 160 * (sprite.size / 100);
-                const spriteHalfWidth = spriteLogicalWidth / 2;
-                const spriteHalfHeight = spriteLogicalHeight / 2;
+                const fullWidth = ${STAGE_WIDTH};
+                const fullHeight = ${STAGE_HEIGHT};
     
                 const wrapPosition = () => {
-                    if (sprite.x - spriteHalfWidth > halfWidth) sprite.x = -halfWidth - spriteHalfWidth;
-                    if (sprite.x + spriteHalfWidth < -halfWidth) sprite.x = halfWidth + spriteHalfWidth;
-                    if (sprite.y - spriteHalfHeight > halfHeight) sprite.y = -halfHeight - spriteHalfHeight;
-                    if (sprite.y + spriteHalfHeight < -halfHeight) sprite.y = halfHeight + spriteHalfHeight;
+                    // Wrap X coordinate
+                    if (sprite.x > halfWidth || sprite.x < -halfWidth) {
+                        sprite.x = ((((sprite.x + halfWidth) % fullWidth) + fullWidth) % fullWidth) - halfWidth;
+                    }
+                    // Wrap Y coordinate
+                    if (sprite.y > halfHeight || sprite.y < -halfHeight) {
+                         sprite.y = ((((sprite.y + halfHeight) % fullHeight) + fullHeight) % fullHeight) - halfHeight;
+                    }
                 };
     
                 const moveSpeed = sprite.speed || 'instant';
@@ -2074,8 +2076,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_ATOMIC) || '0';
         return `
             if (sprite) {
-                sprite.x = (${x});
-                sprite.y = (${y});
+                let targetX = Number(${x});
+                let targetY = Number(${y});
+                const halfWidth = ${STAGE_WIDTH / 2};
+                const halfHeight = ${STAGE_HEIGHT / 2};
+                const fullWidth = ${STAGE_WIDTH};
+                const fullHeight = ${STAGE_HEIGHT};
+    
+                // Wrap X coordinate if it's outside the bounds
+                if (targetX > halfWidth || targetX < -halfWidth) {
+                    targetX = ((((targetX + halfWidth) % fullWidth) + fullWidth) % fullWidth) - halfWidth;
+                }
+                // Wrap Y coordinate if it's outside the bounds
+                if (targetY > halfHeight || targetY < -halfHeight) {
+                     targetY = ((((targetY + halfHeight) % fullHeight) + fullHeight) % fullHeight) - halfHeight;
+                }
+    
+                sprite.x = targetX;
+                sprite.y = targetY;
                 window.refreshSprite(sprite);
                 log(sprite.name + ' moved to: ' + sprite.x.toFixed(0) + ', ' + sprite.y.toFixed(0));
             }
