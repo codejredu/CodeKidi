@@ -100,6 +100,16 @@
             background-position: center;
             border-radius: 12px;
         }
+        #scroller-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* Below sprites */
+            border-radius: 12px; /* Match stage-area */
+            overflow: hidden;
+        }
         .sprite-container {
             position: absolute;
             top: 50%;

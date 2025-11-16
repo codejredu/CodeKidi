@@ -8,7 +8,6 @@
     <script src="https://unpkg.com/blockly@9.0.0/blockly.min.js"></script>
     <link rel="stylesheet" href="index.css">
 <link rel="stylesheet" href="/index.css">
-<link rel="stylesheet" href="/index.css">
 </head>
 <body class="bg-gray-100 text-gray-800">
     <svg width="0" height="0" style="position:absolute;">
@@ -57,659 +56,667 @@
                     <button id="reset-button" class="w-10 h-10 bg-red-500 text-white font-bold rounded-full flex justify-center items-center shadow-md hover:bg-red-600 transition-colors" title="Stop">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                           <path d="M4 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V4a1 1 0 00-1-1H4z" />
-                        </svg>
-                    </button>
-                    <button id="toggle-grid-button" class="w-10 h-10 bg-blue-500 text-white font-bold rounded-full flex justify-center items-center shadow-md hover:bg-blue-600 transition-colors" title="Show Grid">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 4v16m4-16v16M4 10h16M4 14h16"></path>
-                        </svg>
-                    </button>
-                    <button id="fullscreen-button" class="w-10 h-10 bg-blue-500 text-white font-bold rounded-full flex justify-center items-center shadow-md hover:bg-blue-600 transition-colors" title="Fullscreen">
-                         <img id="enter-fullscreen-icon" src="https://codejredu.github.io/test/assets/blocklyicon/fullscreen.svg" class="h-7 w-7">
-                         <img id="exit-fullscreen-icon" src="https://codejredu.github.io/test/assets/blocklyicon/fullscreen_exit.svg" class="h-7 w-7 hidden">
-                    </button>
+                </svg>
+            </button>
+            <button id="toggle-grid-button" class="w-10 h-10 bg-blue-500 text-white font-bold rounded-full flex justify-center items-center shadow-md hover:bg-blue-600 transition-colors" title="Show Grid">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 4v16m4-16v16M4 10h16M4 14h16"></path>
+                </svg>
+            </button>
+            <button id="fullscreen-button" class="w-10 h-10 bg-blue-500 text-white font-bold rounded-full flex justify-center items-center shadow-md hover:bg-blue-600 transition-colors" title="Fullscreen">
+                 <img id="enter-fullscreen-icon" src="https://codejredu.github.io/test/assets/blocklyicon/fullscreen.svg" class="h-7 w-7">
+                 <img id="exit-fullscreen-icon" src="https://codejredu.github.io/test/assets/blocklyicon/fullscreen_exit.svg" class="h-7 w-7 hidden">
+            </button>
+        </div>
+    </div>
+    <div id="stage-aspect-ratio-wrapper" class="w-full relative">
+        <div id="stage-area">
+            <div id="scroller-container"></div>
+            <canvas id="grid-canvas" class="hidden"></canvas>
+        </div>
+    </div>
+    
+    <div id="sprite-properties-panel" class="section hidden">
+        <div class="flex flex-col items-center justify-center gap-y-2 text-sm">
+            <!-- Row 1: Primary properties -->
+            <div id="sprite-properties-row-1" class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+                <!-- Name -->
+                <div class="prop-control-group">
+                    <div class="prop-icon-wrapper">
+                        <img src="https://codejredu.github.io/test/assets/blocklyicon/name.svg" class="prop-icon" alt="Sprite">
+                    </div>
+                    <input type="text" id="prop-name" maxlength="10">
+                </div>
+                <!-- X -->
+                <div class="prop-control-group">
+                    <div class="prop-icon-wrapper">
+                        <img src="https://codejredu.github.io/test/assets/blocklyicon/X.svg" class="prop-icon" alt="X">
+                    </div>
+                    <input type="number" id="prop-x" class="text-center">
+                </div>
+                <!-- Y -->
+                <div class="prop-control-group">
+                    <div class="prop-icon-wrapper">
+                        <img src="https://codejredu.github.io/test/assets/blocklyicon/Y.svg" class="prop-icon" alt="Y">
+                    </div>
+                    <input type="number" id="prop-y" class="text-center">
+                </div>
+                <!-- Size -->
+                <div class="prop-control-group">
+                    <div class="prop-icon-wrapper">
+                        <img src="https://codejredu.github.io/test/assets/blocklyicon/aspect_ratio.svg" class="prop-icon" alt="Size">
+                    </div>
+                    <input type="number" id="prop-size" min="0" class="text-center">
                 </div>
             </div>
-            <div id="stage-aspect-ratio-wrapper" class="w-full relative">
-                <div id="stage-area">
-                    <canvas id="grid-canvas" class="hidden"></canvas>
-                </div>
-            </div>
-            
-            <div id="sprite-properties-panel" class="section hidden">
-                <div class="flex flex-col items-center justify-center gap-y-2 text-sm">
-                    <!-- Row 1: Primary properties -->
-                    <div id="sprite-properties-row-1" class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-                        <!-- Name -->
-                        <div class="prop-control-group">
-                            <div class="prop-icon-wrapper">
-                                <img src="https://codejredu.github.io/test/assets/blocklyicon/name.svg" class="prop-icon" alt="Sprite">
-                            </div>
-                            <input type="text" id="prop-name" maxlength="10">
-                        </div>
-                        <!-- X -->
-                        <div class="prop-control-group">
-                            <div class="prop-icon-wrapper">
-                                <img src="https://codejredu.github.io/test/assets/blocklyicon/X.svg" class="prop-icon" alt="X">
-                            </div>
-                            <input type="number" id="prop-x" class="text-center">
-                        </div>
-                        <!-- Y -->
-                        <div class="prop-control-group">
-                            <div class="prop-icon-wrapper">
-                                <img src="https://codejredu.github.io/test/assets/blocklyicon/Y.svg" class="prop-icon" alt="Y">
-                            </div>
-                            <input type="number" id="prop-y" class="text-center">
-                        </div>
-                        <!-- Size -->
-                        <div class="prop-control-group">
-                            <div class="prop-icon-wrapper">
-                                <img src="https://codejredu.github.io/test/assets/blocklyicon/aspect_ratio.svg" class="prop-icon" alt="Size">
-                            </div>
-                            <input type="number" id="prop-size" min="0" class="text-center">
-                        </div>
+            <!-- Row 2: Secondary properties -->
+            <div id="sprite-properties-row-2" class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+                <!-- Direction -->
+                <div class="prop-control-group">
+                    <div class="prop-icon-wrapper">
+                        <img src="https://codejredu.github.io/test/assets/blocklyicon/compassa.svg" class="prop-icon" alt="Direction">
                     </div>
-                    <!-- Row 2: Secondary properties -->
-                    <div id="sprite-properties-row-2" class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-                        <!-- Direction -->
-                        <div class="prop-control-group">
-                            <div class="prop-icon-wrapper">
-                                <img src="https://codejredu.github.io/test/assets/blocklyicon/compassa.svg" class="prop-icon" alt="Direction">
-                            </div>
-                            <input type="number" id="prop-direction" class="text-center">
-                        </div>
-                        <!-- Show/Hide -->
-                        <div class="prop-control-group">
-                            <div class="prop-icon-wrapper">
-                                <img src="https://codejredu.github.io/test/assets/blocklyicon/visible.svg" class="prop-icon" alt="Show">
-                            </div>
-                            <div class="control-set">
-                                <button id="prop-show" title="Show">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C3.732 4.943 7.523 3 10 3s6.268 1.943 9.542 7c-3.274 5.057-7.27 7-9.542 7S3.732 15.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
-                                </button>
-                                <button id="prop-hide" title="Hide">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>
-                                </button>
-                            </div>
-                        </div>
-                        <!-- Rotation Style -->
-                        <div class="prop-control-group">
-                            <div class="prop-icon-wrapper">
-                                <img src="https://codejredu.github.io/test/assets/blocklyicon/spine.svg" class="prop-icon" alt="Rotation">
-                            </div>
-                            <div id="prop-rotation-style" class="control-set">
-                                <button id="rotation-all-around" title="All Around">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M23 4v6h-6" />
-                                    </svg>
-                                </button>
-                                <button id="rotation-left-right" title="Left-Right">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18m-7 4l4-4m0 0l-4-4m4 4H3" />
-                                    </svg>
-                                </button>
-                                <button id="rotation-dont-rotate" title="Don't Rotate">
-                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 3h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                        <!-- Center Edit -->
-                        <div class="prop-control-group">
-                            <div class="prop-icon-wrapper">
-                                <img src="https://codejredu.github.io/test/assets/blocklyicon/center-focus.svg" class="prop-icon" alt="Center">
-                            </div>
-                            <div class="control-set">
-                                <button id="prop-center-edit-btn" title="Set Sprite Center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a7 7 0 100 14 7 7 0 000-14zM2 10a8 8 0 1116 0 8 8 0 01-16 0zm9-5a1 1 0 10-2 0v4H5a1 1 0 100 2h4v4a1 1 0 102 0v-4h4a1 1 0 100-2h-4V5z" clip-rule="evenodd" /></svg>
-                                </button>
-                            </div>
-                        </div>
+                    <input type="number" id="prop-direction" class="text-center">
+                </div>
+                <!-- Show/Hide -->
+                <div class="prop-control-group">
+                    <div class="prop-icon-wrapper">
+                        <img src="https://codejredu.github.io/test/assets/blocklyicon/visible.svg" class="prop-icon" alt="Show">
+                    </div>
+                    <div class="control-set">
+                        <button id="prop-show" title="Show">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C3.732 4.943 7.523 3 10 3s6.268 1.943 9.542 7c-3.274 5.057-7.27 7-9.542 7S3.732 15.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                        </button>
+                        <button id="prop-hide" title="Hide">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>
+                        </button>
                     </div>
                 </div>
-                 <div id="panel-scroll-controls">
-                    <button id="scroll-up-btn" class="panel-scroll-button" title="Scroll to Stage">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
-                        </svg>
-                    </button>
-                    <button id="scroll-down-btn" class="panel-scroll-button" title="Scroll to Sounds">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                </div>
-                 <div id="gif-animation-panel" class="hidden mt-4 pt-4 border-t border-gray-200">
-                    <h3 class="font-medium text-base mb-2">Animation Control</h3>
-                    <div class="flex items-center gap-4 text-sm">
-                        <button id="gif-play-pause-btn" class="w-8 h-8 bg-blue-500 text-white rounded-full flex justify-center items-center shadow-md hover:bg-blue-600 transition-colors flex-shrink-0" title="Play/Pause">
-                            <svg id="gif-play-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
-                            </svg>
-                            <svg id="gif-pause-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                <!-- Rotation Style -->
+                <div class="prop-control-group">
+                    <div class="prop-icon-wrapper">
+                        <img src="https://codejredu.github.io/test/assets/blocklyicon/spine.svg" class="prop-icon" alt="Rotation">
+                    </div>
+                    <div id="prop-rotation-style" class="control-set">
+                        <button id="rotation-all-around" title="All Around">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M23 4v6h-6" />
                             </svg>
                         </button>
-                        <div class="flex-grow flex items-center gap-2">
-                            <label for="gif-speed-slider" class="font-medium">Speed:</label>
-                            <input type="range" id="gif-speed-slider" min="0.1" max="3" step="0.1" value="1" class="w-full">
-                            <span id="gif-speed-value" class="font-mono w-12 text-center bg-gray-100 rounded p-1">1.0x</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <div class="section-header">
-                     <div class="header-actions">
-                         <div id="create-sprite-header-button" class="header-button" title="Create Sprite">
-                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                             </svg>
-                         </div>
-                         <div id="upload-sprite-header-button" class="header-button" title="Upload Sprite">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                        <button id="rotation-left-right" title="Left-Right">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18m-7 4l4-4m0 0l-4-4m4 4H3" />
                             </svg>
-                         </div>
-                         <div id="add-sprite-button" class="header-button" title="Choose Sprite">
-                            <span class="text-xl font-bold">+</span>
-                         </div>
-                    </div>
-                </div>
-                <div id="sprites-carousel-wrapper" class="relative mt-4">
-                     <div id="sprites-list" class="flex items-center gap-4">
-                        <!-- Sprites will be dynamically added here -->
-                    </div>
-                </div>
-                <div id="sprite-gallery" class="gallery-container">
-                    <button class="close-gallery-button" id="close-sprite-gallery-button">X</button>
-                    <h2 class="text-xl font-bold text-center mb-4">Sprite Gallery</h2>
-                    <div id="sprite-thumbnails-grid" class="thumbnail-grid">
-                        <!-- The create/upload buttons are removed from here -->
-                        <img src="https://codejredu.github.io/claudejr/Chick.svg" alt="Chick" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/Rabbit.svg" alt="Rabbit" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/Beetle.svg" alt="Beetle" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/GingerCat.svg" alt="GingerCat" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/AmericanFootball.svg" alt="AmericanFootball" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/Basketball.svg" alt="Basketball" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/Football.svg" alt="Football" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/Dog.svg" alt="Dog" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/PistonPlane.svg" alt="PistonPlane" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/ColorfulPlane.svg" alt="ColorfulPlane" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/YellowCar.svg" alt="YellowCar" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/Helicopter.svg" alt="Helicopter" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/SpaceShuttle.svg" alt="SpaceShuttle" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/Truck.svg" alt="Truck" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/Tiger.svg" alt="Tiger" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/Rhino.svg" alt="Rhino" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/Spindle.svg" alt="Spindle" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/Crab.svg" alt="Crab" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/GreenSpottedTree.svg" alt="GreenSpottedTree" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/Flamingo.svg" alt="Flamingo" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/Flower.svg" alt="Flower" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/sonne2.svg" alt="Sun" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/Monkey.svg" alt="Monkey" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/Crocodile.svg" alt="Crocodile" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/falcon.svg" alt="Falcon" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/ani/waman%20dance.gif" alt="Waman Dance" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/ani/CAR.gif" alt="Car" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/ani/Hedgehog.gif" alt="Hedgehog" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/ani/KIDWALK.gif" alt="Kid Walk" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/ani/bee.gif" alt="Bee" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/ani/bird2.gif" alt="Bird 2" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/ani/birdred.gif" alt="Red Bird" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/ani/bycycle.gif" alt="Bicycle" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/ani/car1.gif" alt="Car 1" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/ani/dance.gif" alt="Dance" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/ani/dog.gif" alt="Dog" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/ani/fox.gif" alt="Fox" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/ani/gitarwaman.gif" alt="Guitar Woman" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/ani/horse.gif" alt="Horse" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/ani/kidwalk1.gif" alt="Kid Walk 1" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/ani/mouse.gif" alt="Mouse" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/ani/ostrich.gif" alt="Ostrich" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/fishallblue.svg" alt="All Blue Fish" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/fishblue.svg" alt="Blue Fish" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/fishorange.svg" alt="Orange Fish" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/shark.svg" alt="Shark" class="thumbnail">
-                        <img src="https://codejredu.github.io/claudejr/airplaimfd.svg" alt="Airplane" class="thumbnail">
-                    </div>
-                    <input type="file" id="sprite-upload-input" class="hidden" accept="image/png, image/jpeg, image/gif, image/svg+xml">
-                </div>
-            </div>
-
-            <div class="section" id="backdrops-section">
-                <div class="section-header">
-                     <div class="header-actions">
-                         <div id="upload-backdrop-header-button" class="header-button" title="Upload Backdrop">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                        </button>
+                        <button id="rotation-dont-rotate" title="Don't Rotate">
+                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 3h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>
-                         </div>
-                         <div id="add-backdrop-button" class="header-button" title="Choose Backdrop">
-                           <span class="text-xl font-bold">+</span>
-                         </div>
+                        </button>
                     </div>
                 </div>
-                <div id="backdrops-carousel-wrapper" class="relative mt-4">
-                    <div id="backdrops-list" class="flex items-center gap-4">
-                        <!-- Backdrops will be dynamically added here -->
+                <!-- Center Edit -->
+                <div class="prop-control-group">
+                    <div class="prop-icon-wrapper">
+                        <img src="https://codejredu.github.io/test/assets/blocklyicon/center-focus.svg" class="prop-icon" alt="Center">
                     </div>
-                </div>
-                <div id="background-gallery" class="gallery-container">
-                    <button class="close-gallery-button" id="close-gallery-button">X</button>
-                    <h2 class="text-xl font-bold text-center mb-4">Backdrop Gallery</h2>
-                    <div id="thumbnails-grid" class="thumbnail-grid">
-                        <!-- The upload button is removed from here -->
-                        <img src="https://codejredu.github.io/test/assets/bg/Amphitheater.svg" alt="Amphitheater" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/canyon.svg" alt="canyon" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/canyon1.svg" alt="canyon1" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/castel.svg" alt="castel" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/castel1.svg" alt="castel1" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/citynight.svg" alt="citynight" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/citynight2.svg" alt="citynight2" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/colorfulcity.svg" alt="colorfulcity" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/colorfulcity1.svg" alt="colorfulcity1" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/dancestage.svg" alt="Dance Stage" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/desert.svg" alt="desert" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/desert1.svg" alt="desert1" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/farm.svg" alt="farm" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/kidbadroom.svg" alt="kidbadroom" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/kidbadroom1.svg" alt="kidbadroom1" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/moon.svg" alt="moon" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/road1.svg" alt="road1" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/road2.svg" alt="road2" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/room1.svg" alt="room1" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/room2.svg" alt="room2" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/savanna1.svg" alt="savanna1" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/savanna2.svg" alt="savanna2" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/school1.svg" alt="school1" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/slopes1.svg" alt="slopes1" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/slopes2.svg" alt="slopes2" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/soccer1.svg" alt="soccer1" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/soccer2.svg" alt="soccer2" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/winter1.svg" alt="winter1" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/winter2.svg" alt="winter2" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/under.svg" alt="under" class="thumbnail">
-                        <img src="https://codejredu.github.io/test/assets/bg/racebg.svg" alt="Race Background" class="thumbnail">
+                    <div class="control-set">
+                        <button id="prop-center-edit-btn" title="Set Sprite Center">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a7 7 0 100 14 7 7 0 000-14zM2 10a8 8 0 1116 0 8 8 0 01-16 0zm9-5a1 1 0 10-2 0v4H5a1 1 0 100 2h4v4a1 1 0 102 0v-4h4a1 1 0 100-2h-4V5z" clip-rule="evenodd" /></svg>
+                        </button>
                     </div>
-                    <input type="file" id="backdrop-upload-input" class="hidden" accept="image/png, image/jpeg, image/gif, image/svg+xml">
                 </div>
             </div>
+        </div>
+         <div id="panel-scroll-controls">
+            <button id="scroll-up-btn" class="panel-scroll-button" title="Scroll to Stage">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+                </svg>
+            </button>
+            <button id="scroll-down-btn" class="panel-scroll-button" title="Scroll to Sounds">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+        </div>
+         <div id="gif-animation-panel" class="hidden mt-4 pt-4 border-t border-gray-200">
+            <h3 class="font-medium text-base mb-2">Animation Control</h3>
+            <div class="flex items-center gap-4 text-sm">
+                <button id="gif-play-pause-btn" class="w-8 h-8 bg-blue-500 text-white rounded-full flex justify-center items-center shadow-md hover:bg-blue-600 transition-colors flex-shrink-0" title="Play/Pause">
+                    <svg id="gif-play-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                    </svg>
+                    <svg id="gif-pause-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <div class="flex-grow flex items-center gap-2">
+                    <label for="gif-speed-slider" class="font-medium">Speed:</label>
+                    <input type="range" id="gif-speed-slider" min="0.1" max="3" step="0.1" value="1" class="w-full">
+                    <span id="gif-speed-value" class="font-mono w-12 text-center bg-gray-100 rounded p-1">1.0x</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            <div class="section" id="sounds-section">
-                <div class="section-header">
-                     <div class="header-actions">
-                         <div id="record-sound-header-button" class="header-button" title="Record Sound">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+    <div class="section">
+        <div class="section-header">
+             <div class="header-actions">
+                 <div id="create-sprite-header-button" class="header-button" title="Create Sprite">
+                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                     </svg>
+                 </div>
+                 <div id="upload-sprite-header-button" class="header-button" title="Upload Sprite">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                    </svg>
+                 </div>
+                 <div id="add-sprite-button" class="header-button" title="Choose Sprite">
+                    <span class="text-xl font-bold">+</span>
+                 </div>
+            </div>
+        </div>
+        <div id="sprites-carousel-wrapper" class="relative mt-4">
+             <div id="sprites-list" class="flex items-center gap-4">
+                <!-- Sprites will be dynamically added here -->
+            </div>
+        </div>
+        <div id="sprite-gallery" class="gallery-container">
+            <button class="close-gallery-button" id="close-sprite-gallery-button">X</button>
+            <h2 class="text-xl font-bold text-center mb-4">Sprite Gallery</h2>
+            <div id="sprite-thumbnails-grid" class="thumbnail-grid">
+                <!-- The create/upload buttons are removed from here -->
+                <img src="https://codejredu.github.io/claudejr/Chick.svg" alt="Chick" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/Rabbit.svg" alt="Rabbit" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/Beetle.svg" alt="Beetle" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/GingerCat.svg" alt="GingerCat" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/AmericanFootball.svg" alt="AmericanFootball" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/Basketball.svg" alt="Basketball" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/Football.svg" alt="Football" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/Dog.svg" alt="Dog" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/PistonPlane.svg" alt="PistonPlane" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/ColorfulPlane.svg" alt="ColorfulPlane" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/YellowCar.svg" alt="YellowCar" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/Helicopter.svg" alt="Helicopter" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/SpaceShuttle.svg" alt="SpaceShuttle" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/Truck.svg" alt="Truck" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/Tiger.svg" alt="Tiger" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/Rhino.svg" alt="Rhino" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/Spindle.svg" alt="Spindle" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/Crab.svg" alt="Crab" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/GreenSpottedTree.svg" alt="GreenSpottedTree" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/Flamingo.svg" alt="Flamingo" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/Flower.svg" alt="Flower" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/sonne2.svg" alt="Sun" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/Monkey.svg" alt="Monkey" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/Crocodile.svg" alt="Crocodile" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/falcon.svg" alt="Falcon" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/ani/waman%20dance.gif" alt="Waman Dance" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/ani/CAR.gif" alt="Car" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/ani/Hedgehog.gif" alt="Hedgehog" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/ani/KIDWALK.gif" alt="Kid Walk" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/ani/bee.gif" alt="Bee" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/ani/bird2.gif" alt="Bird 2" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/ani/birdred.gif" alt="Red Bird" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/ani/bycycle.gif" alt="Bicycle" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/ani/car1.gif" alt="Car 1" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/ani/dance.gif" alt="Dance" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/ani/dog.gif" alt="Dog" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/ani/fox.gif" alt="Fox" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/ani/gitarwaman.gif" alt="Guitar Woman" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/ani/horse.gif" alt="Horse" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/ani/kidwalk1.gif" alt="Kid Walk 1" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/ani/mouse.gif" alt="Mouse" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/ani/ostrich.gif" alt="Ostrich" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/fishallblue.svg" alt="All Blue Fish" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/fishblue.svg" alt="Blue Fish" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/fishorange.svg" alt="Orange Fish" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/shark.svg" alt="Shark" class="thumbnail">
+                <img src="https://codejredu.github.io/claudejr/airplaimfd.svg" alt="Airplane" class="thumbnail">
+            </div>
+            <input type="file" id="sprite-upload-input" class="hidden" accept="image/png, image/jpeg, image/gif, image/svg+xml">
+        </div>
+    </div>
+
+    <div class="section" id="backdrops-section">
+        <div class="section-header">
+             <div class="header-actions">
+                 <div id="upload-backdrop-header-button" class="header-button" title="Upload Backdrop">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                    </svg>
+                 </div>
+                 <div id="add-backdrop-button" class="header-button" title="Choose Backdrop">
+                   <span class="text-xl font-bold">+</span>
+                 </div>
+            </div>
+        </div>
+        <div id="backdrops-carousel-wrapper" class="relative mt-4">
+            <div id="backdrops-list" class="flex items-center gap-4">
+                <!-- Backdrops will be dynamically added here -->
+            </div>
+        </div>
+        <div id="background-gallery" class="gallery-container">
+            <button class="close-gallery-button" id="close-gallery-button">X</button>
+            <h2 class="text-xl font-bold text-center mb-4">Backdrop Gallery</h2>
+            <div id="thumbnails-grid" class="thumbnail-grid">
+                <!-- The upload button is removed from here -->
+                <img src="https://codejredu.github.io/test/assets/bg/Amphitheater.svg" alt="Amphitheater" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/canyon.svg" alt="canyon" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/canyon1.svg" alt="canyon1" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/castel.svg" alt="castel" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/castel1.svg" alt="castel1" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/citynight.svg" alt="citynight" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/citynight2.svg" alt="citynight2" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/colorfulcity.svg" alt="colorfulcity" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/colorfulcity1.svg" alt="colorfulcity1" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/dancestage.svg" alt="Dance Stage" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/desert.svg" alt="desert" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/desert1.svg" alt="desert1" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/farm.svg" alt="farm" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/kidbadroom.svg" alt="kidbadroom" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/kidbadroom1.svg" alt="kidbadroom1" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/moon.svg" alt="moon" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/road1.svg" alt="road1" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/road2.svg" alt="road2" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/room1.svg" alt="room1" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/room2.svg" alt="room2" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/savanna1.svg" alt="savanna1" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/savanna2.svg" alt="savanna2" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/school1.svg" alt="school1" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/slopes1.svg" alt="slopes1" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/slopes2.svg" alt="slopes2" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/soccer1.svg" alt="soccer1" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/soccer2.svg" alt="soccer2" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/winter1.svg" alt="winter1" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/winter2.svg" alt="winter2" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/under.svg" alt="under" class="thumbnail">
+                <img src="https://codejredu.github.io/test/assets/bg/racebg.svg" alt="Race Background" class="thumbnail">
+            </div>
+            <input type="file" id="backdrop-upload-input" class="hidden" accept="image/png, image/jpeg, image/gif, image/svg+xml">
+        </div>
+    </div>
+
+    <div class="section" id="sounds-section">
+        <div class="section-header">
+             <div class="header-actions">
+                 <div id="record-sound-header-button" class="header-button" title="Record Sound">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    </svg>
+                 </div>
+                 <div id="upload-sound-header-button" class="header-button" title="Upload Sound">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                    </svg>
+                 </div>
+                 <div id="add-sound-button" class="header-button" title="Choose Sound">
+                   <span class="text-xl font-bold">+</span>
+                 </div>
+            </div>
+        </div>
+        <div id="sounds-carousel-wrapper" class="relative mt-4">
+            <div id="sounds-list" class="flex items-center gap-4">
+                <!-- Sounds will be dynamically added here -->
+            </div>
+        </div>
+        <div id="sound-gallery" class="gallery-container">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Sound Gallery</h2>
+                <div class="flex items-center">
+                    <button id="add-selected-sounds-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">Add</button>
+                    <button class="close-gallery-button !static !inline-flex !ml-2" id="close-sound-gallery-button">&times;</button>
+                </div>
+            </div>
+            <div id="sound-gallery-grid" class="thumbnail-grid">
+                <!-- Sounds will be dynamically added here by JS -->
+            </div>
+            <input type="file" id="sound-upload-input" class="hidden" accept="audio/mpeg, audio/wav, audio/ogg">
+        </div>
+    </div>
+</div>
+
+<div class="right-panel">
+    <div id="blockly-area" class="h-[80vh] min-h-[500px] w-full rounded-2xl"></div>
+</div>
+</div>
+
+<div id="number-pad-container" class="number-pad-container">
+<div id="number-pad-display" class="number-pad-display"></div>
+<div class="number-pad-grid">
+    <button data-value="7">7</button>
+    <button data-value="8">8</button>
+    <button data-value="9">9</button>
+    <button data-value="4">4</button>
+    <button data-value="5">5</button>
+    <button data-value="6">6</button>
+    <button data-value="1">1</button>
+    <button data-value="2">2</button>
+    <button data-value="3">3</button>
+    <button data-value="0">0</button>
+    <button data-value=".">.</button>
+    <button data-value="-">-</button>
+    <button data-value="backspace">⌫</button>
+</div>
+<button id="number-pad-done" class="number-pad-done">OK</button>
+</div>
+
+<div id="angle-picker-widget">
+<div id="angle-picker-dial">
+    <div id="angle-picker-handle"></div>
+</div>
+</div>
+
+<!-- Character Creator Modal -->
+<div id="character-creator-modal">
+<div class="creator-content">
+    <div class="creator-header">
+        <h2>Character Creator</h2>
+        <div class="flex gap-4">
+            <button id="creator-save-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg transition-colors">Save</button>
+            <button id="creator-close-button" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors">Close</button>
+        </div>
+    </div>
+    <div class="creator-main">
+        <div class="creator-controls">
+            <div id="creator-categories" class="creator-categories">
+                <!-- Categories will be populated by JS -->
+            </div>
+            <div id="creator-parts-grid" class="creator-parts-grid">
+                <!-- Part thumbnails will be populated by JS -->
+            </div>
+        </div>
+        <div class="creator-preview">
+            <canvas id="character-canvas" width="400" height="400"></canvas>
+            <div id="creator-controls-panel" class="hidden">
+                 <div class="text-center font-bold text-lg mb-2">
+                   Editing <span id="selected-part-label"></span>
+                </div>
+                <div id="creator-color-group" class="control-group">
+                    <label>Color:</label>
+                    <div id="creator-color-palette">
+                        <!-- Color swatches go here -->
+                    </div>
+                </div>
+                <div id="creator-width-group" class="control-group hidden">
+                    <label>Width:</label>
+                    <div class="value-stepper">
+                        <button id="creator-decrease-width" title="Decrease Width">-</button>
+                        <span id="creator-width-value">100</span>
+                        <button id="creator-increase-width" title="Increase Width">+</button>
+                    </div>
+                </div>
+                <div id="creator-height-group" class="control-group hidden">
+                    <label>Height:</label>
+                    <div class="value-stepper">
+                        <button id="creator-decrease-height" title="Decrease Height">-</button>
+                        <span id="creator-height-value">100</span>
+                        <button id="creator-increase-height" title="Increase Height">+</button>
+                    </div>
+                </div>
+                <div id="creator-position-group" class="control-group hidden">
+                    <label>Position:</label>
+                    <div id="creator-d-pad">
+                        <button id="d-pad-up" class="d-pad-button d-pad-up" title="Move Up">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+                        </button>
+                        <button id="d-pad-left" class="d-pad-button d-pad-left" title="Move Left">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                        </button>
+                        <div class="d-pad-center"></div>
+                        <button id="d-pad-right" class="d-pad-button d-pad-right" title="Move Right">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+                        </button>
+                        <button id="d-pad-down" class="d-pad-button d-pad-down" title="Move Down">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="creator-actions-group" class="control-group hidden">
+                    <label>Actions:</label>
+                    <div class="flex gap-2">
+                        <button id="creator-flip-h-button" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16H3m4 0l-4-4m4 4l-4 4m18-4h-4m4 0l-4-4m4 4l-4 4M12 3v18" />
                             </svg>
-                         </div>
-                         <div id="upload-sound-header-button" class="header-button" title="Upload Sound">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                            </svg>
-                         </div>
-                         <div id="add-sound-button" class="header-button" title="Choose Sound">
-                           <span class="text-xl font-bold">+</span>
-                         </div>
+                            <span>Flip Horizontal</span>
+                        </button>
                     </div>
-                </div>
-                <div id="sounds-carousel-wrapper" class="relative mt-4">
-                    <div id="sounds-list" class="flex items-center gap-4">
-                        <!-- Sounds will be dynamically added here -->
-                    </div>
-                </div>
-                <div id="sound-gallery" class="gallery-container">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold">Sound Gallery</h2>
-                        <div class="flex items-center">
-                            <button id="add-selected-sounds-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">Add</button>
-                            <button class="close-gallery-button !static !inline-flex !ml-2" id="close-sound-gallery-button">&times;</button>
-                        </div>
-                    </div>
-                    <div id="sound-gallery-grid" class="thumbnail-grid">
-                        <!-- Sounds will be dynamically added here by JS -->
-                    </div>
-                    <input type="file" id="sound-upload-input" class="hidden" accept="audio/mpeg, audio/wav, audio/ogg">
                 </div>
             </div>
         </div>
+    </div>
+</div>
+</div>
 
-        <div class="right-panel">
-            <div id="blockly-area" class="h-[80vh] min-h-[500px] w-full rounded-2xl"></div>
+<!-- Sound Recorder Modal -->
+<div id="sound-recorder-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+<div class="recorder-content bg-white p-6 rounded-lg shadow-xl w-full max-w-md flex flex-col items-center gap-4">
+    <h2 class="text-2xl font-bold">Record New Sound</h2>
+    <div id="recorder-message" class="hidden w-full text-center p-3 rounded-lg bg-red-100 text-red-700 border border-red-200"></div>
+    <div id="recorder-ui-content" class="flex flex-col items-center gap-4 w-full">
+        <div id="recorder-visualizer" class="w-32 h-32 bg-purple-200 rounded-full flex justify-center items-center">
+            <div id="recorder-mic-icon">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                </svg>
+            </div>
+        </div>
+        <div id="recorder-timer" class="text-2xl font-mono">0.0 / 15.0</div>
+        <div id="recorder-preview-container" class="hidden w-full flex flex-col items-center gap-2">
+             <audio id="recorder-audio-preview" controls class="w-full"></audio>
+             <input type="text" id="recorder-sound-name" placeholder="Sound Name" class="p-2 border rounded-lg w-full mt-2">
+        </div>
+        <div id="recorder-controls" class="flex items-center justify-center gap-4 h-16">
+             <button id="recorder-record-btn" class="bg-red-500 text-white rounded-full w-16 h-16 flex justify-center items-center text-sm font-bold shadow-lg">Record</button>
+             <button id="recorder-stop-btn" class="hidden bg-gray-700 text-white rounded-full w-16 h-16 flex justify-center items-center text-sm font-bold shadow-lg">Stop</button>
+             <button id="recorder-rerecord-btn" class="hidden bg-yellow-500 text-white py-2 px-4 rounded-lg font-bold">Record Again</button>
+             <button id="recorder-save-btn" class="hidden bg-green-500 text-white py-2 px-4 rounded-lg font-bold">Save</button>
         </div>
     </div>
-    
-    <div id="number-pad-container" class="number-pad-container">
-        <div id="number-pad-display" class="number-pad-display"></div>
-        <div class="number-pad-grid">
-            <button data-value="7">7</button>
-            <button data-value="8">8</button>
-            <button data-value="9">9</button>
-            <button data-value="4">4</button>
-            <button data-value="5">5</button>
-            <button data-value="6">6</button>
-            <button data-value="1">1</button>
-            <button data-value="2">2</button>
-            <button data-value="3">3</button>
-            <button data-value="0">0</button>
-            <button data-value=".">.</button>
-            <button data-value="-">-</button>
-            <button data-value="backspace">⌫</button>
-        </div>
-        <button id="number-pad-done" class="number-pad-done">OK</button>
-    </div>
+    <button id="recorder-close-btn" class="absolute top-3 right-3 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
+</div>
+</div>
 
-    <div id="angle-picker-widget">
-        <div id="angle-picker-dial">
-            <div id="angle-picker-handle"></div>
-        </div>
+<!-- Sprite Center Editor Modal -->
+<div id="center-editor-modal" class="center-editor-modal">
+<div class="center-editor-content">
+    <h2>Set Sprite Center</h2>
+    <div id="center-editor-preview">
+        <!-- image and marker are added by JS -->
     </div>
-    
-    <!-- Character Creator Modal -->
-    <div id="character-creator-modal">
-        <div class="creator-content">
-            <div class="creator-header">
-                <h2>Character Creator</h2>
-                <div class="flex gap-4">
-                    <button id="creator-save-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg transition-colors">Save</button>
-                    <button id="creator-close-button" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors">Close</button>
-                </div>
-            </div>
-            <div class="creator-main">
-                <div class="creator-controls">
-                    <div id="creator-categories" class="creator-categories">
-                        <!-- Categories will be populated by JS -->
-                    </div>
-                    <div id="creator-parts-grid" class="creator-parts-grid">
-                        <!-- Part thumbnails will be populated by JS -->
-                    </div>
-                </div>
-                <div class="creator-preview">
-                    <canvas id="character-canvas" width="400" height="400"></canvas>
-                    <div id="creator-controls-panel" class="hidden">
-                         <div class="text-center font-bold text-lg mb-2">
-                           Editing <span id="selected-part-label"></span>
-                        </div>
-                        <div id="creator-color-group" class="control-group">
-                            <label>Color:</label>
-                            <div id="creator-color-palette">
-                                <!-- Color swatches go here -->
-                            </div>
-                        </div>
-                        <div id="creator-width-group" class="control-group hidden">
-                            <label>Width:</label>
-                            <div class="value-stepper">
-                                <button id="creator-decrease-width" title="Decrease Width">-</button>
-                                <span id="creator-width-value">100</span>
-                                <button id="creator-increase-width" title="Increase Width">+</button>
-                            </div>
-                        </div>
-                        <div id="creator-height-group" class="control-group hidden">
-                            <label>Height:</label>
-                            <div class="value-stepper">
-                                <button id="creator-decrease-height" title="Decrease Height">-</button>
-                                <span id="creator-height-value">100</span>
-                                <button id="creator-increase-height" title="Increase Height">+</button>
-                            </div>
-                        </div>
-                        <div id="creator-position-group" class="control-group hidden">
-                            <label>Position:</label>
-                            <div id="creator-d-pad">
-                                <button id="d-pad-up" class="d-pad-button d-pad-up" title="Move Up">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
-                                </button>
-                                <button id="d-pad-left" class="d-pad-button d-pad-left" title="Move Left">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
-                                </button>
-                                <div class="d-pad-center"></div>
-                                <button id="d-pad-right" class="d-pad-button d-pad-right" title="Move Right">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
-                                </button>
-                                <button id="d-pad-down" class="d-pad-button d-pad-down" title="Move Down">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                                </button>
-                            </div>
-                        </div>
-                        <div id="creator-actions-group" class="control-group hidden">
-                            <label>Actions:</label>
-                            <div class="flex gap-2">
-                                <button id="creator-flip-h-button" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16H3m4 0l-4-4m4 4l-4 4m18-4h-4m4 0l-4-4m4 4l-4 4M12 3v18" />
-                                    </svg>
-                                    <span>Flip Horizontal</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="center-editor-buttons">
+        <button id="center-editor-cancel-btn">Cancel</button>
+        <button id="center-editor-save-btn">Save</button>
     </div>
-    
-    <!-- Sound Recorder Modal -->
-    <div id="sound-recorder-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-        <div class="recorder-content bg-white p-6 rounded-lg shadow-xl w-full max-w-md flex flex-col items-center gap-4">
-            <h2 class="text-2xl font-bold">Record New Sound</h2>
-            <div id="recorder-message" class="hidden w-full text-center p-3 rounded-lg bg-red-100 text-red-700 border border-red-200"></div>
-            <div id="recorder-ui-content" class="flex flex-col items-center gap-4 w-full">
-                <div id="recorder-visualizer" class="w-32 h-32 bg-purple-200 rounded-full flex justify-center items-center">
-                    <div id="recorder-mic-icon">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                        </svg>
-                    </div>
-                </div>
-                <div id="recorder-timer" class="text-2xl font-mono">0.0 / 15.0</div>
-                <div id="recorder-preview-container" class="hidden w-full flex flex-col items-center gap-2">
-                     <audio id="recorder-audio-preview" controls class="w-full"></audio>
-                     <input type="text" id="recorder-sound-name" placeholder="Sound Name" class="p-2 border rounded-lg w-full mt-2">
-                </div>
-                <div id="recorder-controls" class="flex items-center justify-center gap-4 h-16">
-                     <button id="recorder-record-btn" class="bg-red-500 text-white rounded-full w-16 h-16 flex justify-center items-center text-sm font-bold shadow-lg">Record</button>
-                     <button id="recorder-stop-btn" class="hidden bg-gray-700 text-white rounded-full w-16 h-16 flex justify-center items-center text-sm font-bold shadow-lg">Stop</button>
-                     <button id="recorder-rerecord-btn" class="hidden bg-yellow-500 text-white py-2 px-4 rounded-lg font-bold">Record Again</button>
-                     <button id="recorder-save-btn" class="hidden bg-green-500 text-white py-2 px-4 rounded-lg font-bold">Save</button>
-                </div>
-            </div>
-            <button id="recorder-close-btn" class="absolute top-3 right-3 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
-        </div>
-    </div>
-
-    <!-- Sprite Center Editor Modal -->
-    <div id="center-editor-modal" class="center-editor-modal">
-        <div class="center-editor-content">
-            <h2>Set Sprite Center</h2>
-            <div id="center-editor-preview">
-                <!-- image and marker are added by JS -->
-            </div>
-            <div class="center-editor-buttons">
-                <button id="center-editor-cancel-btn">Cancel</button>
-                <button id="center-editor-save-btn">Save</button>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
 
 
-    <xml id="toolbox" style="display: none">
-        <category 
-            name="Events" 
-            colour="#FFC107" 
-            icon-uri="https://codejredu.github.io/test/assets/blocklyicon/events.svg">
-            <block type="event_when_flag_clicked"></block>
-            <block type="event_when_sprite_clicked"></block>
-            <block type="event_when_key_pressed"></block>
-            <block type="event_when_bump"></block>
-            <block type="event_broadcast"></block>
-            <block type="event_when_broadcast_received"></block>
-        </category>
-        <category 
-            name="Control" 
-            colour="#FF6B1A"
-            icon-uri="https://codejredu.github.io/test/assets/blocklyicon/controknobs.svg">
-            <block type="control_wait_secs">
-                <value name="SECS">
-                    <shadow type="math_number">
-                        <field name="NUM">1</field>
-                    </shadow>
-                </value>
-            </block>
-            <block type="control_repeat_times">
-                <value name="TIMES">
-                    <shadow type="math_number">
-                        <field name="NUM">10</field>
-                    </shadow>
-                </value>
-            </block>
-            <block type="control_forever"></block>
-        </category>
-        <category 
-            name="Motion" 
-            colour="#4C97FF"
-            icon-uri="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%233e83f7'><path d='M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z'/></svg>">
-            <block type="motion_move_steps">
-                <value name="STEPS">
-                    <shadow type="math_number">
-                        <field name="NUM">10</field>
-                    </shadow>
-                </value>
-            </block>
-            <block type="motion_set_speed"></block>
-            <block type="motion_turn_right_degrees">
-                <value name="DEGREES">
-                    <shadow type="math_number">
-                        <field name="NUM">15</field>
-                    </shadow>
-                </value>
-            </block>
-            <block type="motion_turn_left_degrees">
-                <value name="DEGREES">
-                    <shadow type="math_number">
-                        <field name="NUM">15</field>
-                    </shadow>
-                </value>
-            </block>
-            <block type="motion_set_direction">
-                <field name="DEGREES">90</field>
-            </block>
-            <block type="motion_go_to_xy">
-                <value name="X">
-                    <shadow type="math_number">
-                        <field name="NUM">0</field>
-                    </shadow>
-                </value>
-                <value name="Y">
-                    <shadow type="math_number">
-                        <field name="NUM">0</field>
-                    </shadow>
-                </value>
-            </block>
-            <block type="motion_glide_to_xy">
-                <value name="SECS">
-                    <shadow type="math_number">
-                        <field name="NUM">1</field>
-                    </shadow>
-                </value>
-                <value name="X">
-                    <shadow type="math_number">
-                        <field name="NUM">0</field>
-                    </shadow>
-                </value>
-                <value name="Y">
-                    <shadow type="math_number">
-                        <field name="NUM">0</field>
-                    </shadow>
-                </value>
-            </block>
-            <block type="motion_jump">
-                <value name="HEIGHT">
-                    <shadow type="math_number">
-                        <field name="NUM">100</field>
-                    </shadow>
-                </value>
-            </block>
-            <block type="motion_xcor"></block>
-            <block type="motion_ycor"></block>
-        </category>
-        <category 
-            name="Looks" 
-            colour="#9966FF"
-            icon-uri="https://codejredu.github.io/test/assets/blocklyicon/body.svg">
-            <block type="looks_say_for_secs">
-                <value name="MESSAGE">
-                    <shadow type="text">
-                        <field name="TEXT">Hello!</field>
-                    </shadow>
-                </value>
-                <value name="SECS">
-                    <shadow type="math_number">
-                        <field name="NUM">2</field>
-                    </shadow>
-                </value>
-            </block>
-            <block type="looks_say">
-                <value name="MESSAGE">
-                    <shadow type="text">
-                        <field name="TEXT">Hello!</field>
-                    </shadow>
-                </value>
-            </block>
-            <block type="looks_show"></block>
-            <block type="looks_hide"></block>
-            <block type="looks_grow">
-                <value name="SIZE">
-                    <shadow type="math_number">
-                        <field name="NUM">10</field>
-                    </shadow>
-                </value>
-            </block>
-            <block type="looks_shrink">
-                <value name="SIZE">
-                    <shadow type="math_number">
-                        <field name="NUM">10</field>
-                    </shadow>
-                </value>
-            </block>
-            <block type="looks_set_size">
-                <value name="SIZE">
-                    <shadow type="math_number">
-                        <field name="NUM">100</field>
-                    </shadow>
-                </value>
-            </block>
-            <block type="looks_change_layer"></block>
-            <block type="looks_switch_backdrop"></block>
-        </category>
-        <category 
-            name="Sound" 
-            colour="#CF63CF"
-            icon-uri="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23b858b8'><path d='M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z'></path></svg>">
-             <block type="sound_play_until_done"></block>
-        </category>
-        <category 
-            name="Operators" 
-            colour="#40BF4A"
-            icon-uri="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23389a40'><path d='M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm4 11h-3v3h-2v-3H8v-2h3V8h2v3h3v2z' /></svg>">
-            <block type="operator_add"></block>
-            <block type="operator_subtract"></block>
-            <block type="operator_multiply"></block>
-            <block type="operator_divide"></block>
-            <block type="operator_random_number">
-                <field name="FROM">1</field>
-                <field name="TO">10</field>
-            </block>
-            <block type="math_number"></block>
-        </category>
-    </xml>
-    
-    <script type="module" src="index.js"></script>
-<script type="module" src="/index.tsx"></script>
+<xml id="toolbox" style="display: none">
+<category 
+    name="Events" 
+    colour="#FFC107" 
+    icon-uri="https://codejredu.github.io/test/assets/blocklyicon/events.svg">
+    <block type="event_when_flag_clicked"></block>
+    <block type="event_when_sprite_clicked"></block>
+    <block type="event_when_key_pressed"></block>
+    <block type="event_when_bump"></block>
+    <block type="event_broadcast"></block>
+    <block type="event_when_broadcast_received"></block>
+</category>
+<category 
+    name="Control" 
+    colour="#FF6B1A"
+    icon-uri="https://codejredu.github.io/test/assets/blocklyicon/controknobs.svg">
+    <block type="control_wait_secs">
+        <value name="SECS">
+            <shadow type="math_number">
+                <field name="NUM">1</field>
+            </shadow>
+        </value>
+    </block>
+    <block type="control_repeat_times">
+        <value name="TIMES">
+            <shadow type="math_number">
+                <field name="NUM">10</field>
+            </shadow>
+        </value>
+    </block>
+    <block type="control_forever"></block>
+</category>
+<category 
+    name="Motion" 
+    colour="#4C97FF"
+    icon-uri="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%233e83f7'><path d='M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z'/></svg>">
+    <block type="motion_move_steps">
+        <value name="STEPS">
+            <shadow type="math_number">
+                <field name="NUM">10</field>
+            </shadow>
+        </value>
+    </block>
+    <block type="motion_set_speed"></block>
+    <block type="motion_turn_right_degrees">
+        <value name="DEGREES">
+            <shadow type="math_number">
+                <field name="NUM">15</field>
+            </shadow>
+        </value>
+    </block>
+    <block type="motion_turn_left_degrees">
+        <value name="DEGREES">
+            <shadow type="math_number">
+                <field name="NUM">15</field>
+            </shadow>
+        </value>
+    </block>
+    <block type="motion_set_direction">
+        <field name="DEGREES">90</field>
+    </block>
+    <block type="motion_go_to_xy">
+        <value name="X">
+            <shadow type="math_number">
+                <field name="NUM">0</field>
+            </shadow>
+        </value>
+        <value name="Y">
+            <shadow type="math_number">
+                <field name="NUM">0</field>
+            </shadow>
+        </value>
+    </block>
+    <block type="motion_glide_to_xy">
+        <value name="SECS">
+            <shadow type="math_number">
+                <field name="NUM">1</field>
+            </shadow>
+        </value>
+        <value name="X">
+            <shadow type="math_number">
+                <field name="NUM">0</field>
+            </shadow>
+        </value>
+        <value name="Y">
+            <shadow type="math_number">
+                <field name="NUM">0</field>
+            </shadow>
+        </value>
+    </block>
+    <block type="motion_jump">
+        <value name="HEIGHT">
+            <shadow type="math_number">
+                <field name="NUM">100</field>
+            </shadow>
+        </value>
+    </block>
+    <block type="motion_xcor"></block>
+    <block type="motion_ycor"></block>
+</category>
+<category 
+    name="Looks" 
+    colour="#9966FF"
+    icon-uri="https://codejredu.github.io/test/assets/blocklyicon/body.svg">
+    <block type="looks_say_for_secs">
+        <value name="MESSAGE">
+            <shadow type="text">
+                <field name="TEXT">Hello!</field>
+            </shadow>
+        </value>
+        <value name="SECS">
+            <shadow type="math_number">
+                <field name="NUM">2</field>
+            </shadow>
+        </value>
+    </block>
+    <block type="looks_say">
+        <value name="MESSAGE">
+            <shadow type="text">
+                <field name="TEXT">Hello!</field>
+            </shadow>
+        </value>
+    </block>
+    <block type="looks_show"></block>
+    <block type="looks_hide"></block>
+    <block type="looks_grow">
+        <value name="SIZE">
+            <shadow type="math_number">
+                <field name="NUM">10</field>
+            </shadow>
+        </value>
+    </block>
+    <block type="looks_shrink">
+        <value name="SIZE">
+            <shadow type="math_number">
+                <field name="NUM">10</field>
+            </shadow>
+        </value>
+    </block>
+    <block type="looks_set_size">
+        <value name="SIZE">
+            <shadow type="math_number">
+                <field name="NUM">100</field>
+            </shadow>
+        </value>
+    </block>
+    <block type="looks_change_layer"></block>
+    <block type="looks_switch_backdrop"></block>
+    <block type="scrolling_backdrop_scroll">
+        <value name="SPEED">
+            <shadow type="math_number">
+                <field name="NUM">10</field>
+            </shadow>
+        </value>
+    </block>
+    <block type="scrolling_backdrop_stop"></block>
+</category>
+<category 
+    name="Sound" 
+    colour="#CF63CF"
+    icon-uri="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23b858b8'><path d='M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z'></path></svg>">
+     <block type="sound_play_until_done"></block>
+</category>
+<category 
+    name="Operators" 
+    colour="#40BF4A"
+    icon-uri="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23389a40'><path d='M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm4 11h-3v3h-2v-3H8v-2h3V8h2v3h3v2z' /></svg>">
+    <block type="operator_add"></block>
+    <block type="operator_subtract"></block>
+    <block type="operator_multiply"></block>
+    <block type="operator_divide"></block>
+    <block type="operator_random_number">
+        <field name="FROM">1</field>
+        <field name="TO">10</field>
+    </block>
+    <block type="math_number"></block>
+</category>
+</xml>
+
+<script type="module" src="index.js"></script>
 <script type="module" src="/index.tsx"></script>
 </body>
 </html>

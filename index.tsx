@@ -1,1 +1,1 @@
-// This file is intentionally left blank for future use.
+// This file is intentionally left blank to consolidate all logic into index.js.

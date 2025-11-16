@@ -2,6 +2,7 @@
 import { initCharacterCreator } from './Caracter.js';
 import { SpriteCenterEditor } from './center.js';
 import soundUIController from './sound-ui.js';
+import { BackdropScroller } from './scroller.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // START OF CUSTOM TOOLBOX RRENDERER
@@ -366,6 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastTimestamp = 0;
     let nextZIndex = 10;
     let centerEditor = null;
+    let backdropScroller = null;
     // Make frameDeltaTime accessible globally so the generated code can see it.
     window.frameDeltaTime = 1000 / 60; // Time in ms for one frame at 60fps.
     
@@ -469,9 +471,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.switchBackdrop = (url) => {
-        if (!url || url === 'NONE') return;
+        if (!url || url === 'NONE') {
+            if (backdropScroller) backdropScroller.updateImage(null);
+            return;
+        }
         try {
             stageArea.style.backgroundImage = `url("${url}")`;
+            if (backdropScroller) backdropScroller.updateImage(url);
             document.querySelectorAll('.backdrop-card').forEach(card => card.classList.remove('selected'));
             const cardToSelect = Array.from(document.querySelectorAll('.backdrop-card')).find(card => card.dataset.url === url);
             if (cardToSelect) cardToSelect.classList.add('selected');
@@ -646,6 +652,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!spriteData) return;
 
         const container = document.getElementById(`container-${spriteData.id}`);
+        if (!container) return; // Add check for container
         const wrapper = container.querySelector('.sprite-wrapper');
         
         if (container && wrapper) {
@@ -1180,6 +1187,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.addEventListener('resize', () => {
+        if (backdropScroller) backdropScroller.resetPositions();
         Object.keys(sprites).forEach(updateSpriteAppearance);
         Blockly.svgResize(workspace);
     });
@@ -2021,6 +2029,74 @@ document.addEventListener('DOMContentLoaded', () => {
         return `window.changeSpriteLayer(sprite, '${action}'); yield;`;
     };
     
+    Blockly.Blocks['scrolling_backdrop_scroll'] = {
+        init: function() {
+            const directionOptions = [
+                [{
+                    src: `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12h14'/><path d='m12 5 7 7-7 7'/></svg>`,
+                    width: 24, height: 24, alt: 'Right'
+                }, 'right'],
+                [{
+                    src: `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M19 12H5'/><path d='m12 19-7-7 7-7'/></svg>`,
+                    width: 24, height: 24, alt: 'Left'
+                }, 'left'],
+                [{
+                    src: `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M12 19V5'/><path d='m5 12 7-7 7 7'/></svg>`,
+                    width: 24, height: 24, alt: 'Up'
+                }, 'up'],
+                [{
+                    src: `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M12 5v14'/><path d='m19 12-7 7-7-7'/></svg>`,
+                    width: 24, height: 24, alt: 'Down'
+                }, 'down']
+            ];
+
+            this.appendValueInput("SPEED")
+                .setCheck("Number")
+                .appendField(new Blockly.FieldImage("https://codejredu.github.io/test/assets/blocklyicon/scroll.svg", 34, 34, "*"))
+                .appendField(new Blockly.FieldDropdown(directionOptions), "DIRECTION")
+                .appendField(new Blockly.FieldImage("https://codejredu.github.io/test/assets/blocklyicon/speedsvg.svg", 24, 24, "*"));
+            this.setInputsInline(true);
+            this.setPreviousStatement(true, null);
+            this.setNextStatement(true, null);
+            this.setColour("#9966FF"); // Looks color
+            this.setTooltip("גורם לרקע לגלול בכיוון ובמהירות שנבחרו.");
+        }
+    };
+
+    Blockly.JavaScript['scrolling_backdrop_scroll'] = function(block) {
+        const direction = block.getFieldValue('DIRECTION');
+        const speed = Blockly.JavaScript.valueToCode(block, 'SPEED', Blockly.JavaScript.ORDER_ATOMIC) || '10';
+        return `
+            if (backdropScroller) {
+                backdropScroller.scroll('${direction}', ${speed});
+            }
+            yield;
+        `;
+    };
+
+    Blockly.Blocks['scrolling_backdrop_stop'] = {
+        init: function() {
+            this.appendDummyInput()
+                .appendField(new Blockly.FieldImage("https://codejredu.github.io/test/assets/blocklyicon/scroll.svg", 34, 34, "*"))
+                .appendField('\u00A0\u00A0')
+                .appendField(new Blockly.FieldImage("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='red'><path d='M6 6h12v12H6z'/></svg>", 24, 24, "Stop"))
+                .appendField('\u00A0'.repeat(10));
+            this.setPreviousStatement(true, null);
+            this.setNextStatement(true, null);
+            this.setColour("#9966FF"); // Looks color
+            this.setTooltip("עוצר את גלילת הרקע.");
+        }
+    };
+
+    Blockly.JavaScript['scrolling_backdrop_stop'] = function(block) {
+        return `
+            if (backdropScroller) {
+                backdropScroller.stop();
+            }
+            yield;
+        `;
+    };
+
     Blockly.Blocks['control_wait_secs'] = {
         init: function() {
             this.appendValueInput("SECS").setCheck("Number").appendField(new Blockly.FieldImage("https://codejredu.github.io/test/assets/blocklyicon/wait.svg", 34, 34, "*"));
@@ -2704,9 +2780,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // The generated code will access window.frameDeltaTime, which is updated every tick.
         const GeneratorFunction = Object.getPrototypeOf(function*(){}).constructor;
-        const func = new GeneratorFunction('sprite', 'log', 'getExecutionCancelled', 'window', 'soundUIController', code);
+        const func = new GeneratorFunction('sprite', 'log', 'getExecutionCancelled', 'window', 'soundUIController', 'backdropScroller', code);
         
-        return func(sprite, log, getExecutionCancelled, window, soundUIController);
+        return func(sprite, log, getExecutionCancelled, window, soundUIController, backdropScroller);
     }
 
     function runScriptStack(startBlock) {
@@ -2742,9 +2818,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!code) return null;
 
         const GeneratorFunction = Object.getPrototypeOf(function*(){}).constructor;
-        const func = new GeneratorFunction('sprite', 'log', 'getExecutionCancelled', 'window', 'soundUIController', code);
+        const func = new GeneratorFunction('sprite', 'log', 'getExecutionCancelled', 'window', 'soundUIController', 'backdropScroller', code);
         
-        return func(sprite, log, getExecutionCancelled, window, soundUIController);
+        return func(sprite, log, getExecutionCancelled, window, soundUIController, backdropScroller);
     }
     
     function runScriptFromBlock(startBlock) {
@@ -3254,8 +3330,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function createDefaultBackdrop() {
         const url = "https://codejredu.github.io/test/assets/bg/farm.svg";
         const card = createBackdropCard(url);
-        card.classList.add('selected');
-        stageArea.style.backgroundImage = `url("${url}")`;
+        window.switchBackdrop(url);
     }
 
     function createDefaultSprite() {
@@ -3734,6 +3809,10 @@ document.addEventListener('DOMContentLoaded', () => {
         window.frameDeltaTime = timestamp - lastTimestamp;
         lastTimestamp = timestamp;
 
+        if (backdropScroller) {
+            backdropScroller.update(window.frameDeltaTime / 1000);
+        }
+
         if (scriptRunner) {
             scriptRunner.tick();
         }
@@ -3782,6 +3861,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         centerEditor.init();
+        
+        backdropScroller = new BackdropScroller('scroller-container');
         
         window.characterCreator = initCharacterCreator({
             onSave: ({ name, dataUrl, characterData, editingSpriteId }) => {
