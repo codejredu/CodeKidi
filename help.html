@@ -1,1 +1,71 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Help</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      background-color: #FCF8F0;
+      font-family: 'Inter', sans-serif, system-ui;
+    }
+    h1 {
+      color: #ef4444;
+      font-size: 3rem;
+      font-weight: bold;
+      margin-bottom: 40px;
+    }
+    .videos-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      width: 100%;
+      max-width: 1200px;
+    }
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+      height: 0;
+      overflow: hidden;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Coming soon...</h1>
+  <div class="videos-container">
+    <div class="video-wrapper">
+      <iframe src="https://www.youtube.com/embed/vuRXDgLqX3I" title="YouTube video 1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <div class="video-wrapper">
+      <iframe src="https://www.youtube.com/embed/kRUUKiAIsss" title="YouTube video 2" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <div class="video-wrapper">
+      <iframe src="https://www.youtube.com/embed/hiDvkwY-OGs" title="YouTube video 3" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <div class="video-wrapper">
+      <iframe src="https://www.youtube.com/embed/CbVcKjLBfT0" title="YouTube video 4" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <div class="video-wrapper">
+      <iframe src="https://www.youtube.com/embed/xBNdxXAtzyo" title="YouTube video 5" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+  </div>
+</body>
+</html>
