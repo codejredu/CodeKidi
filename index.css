@@ -1500,4 +1500,17 @@
                 height: 60vh;
             }
         }
+
+        /* Responsive adjustments for sprite properties panel on medium screens */
+        @media (max-width: 1300px) {
+            #sprite-properties-row-1,
+            #sprite-properties-row-2 {
+                display: grid;
+                grid-template-columns: repeat(2, auto);
+                justify-content: center;
+                gap: 0.5rem 1rem; /* row-gap column-gap */
+                width: fit-content; /* Ensure the grid itself doesn't stretch unnecessarily */
+                margin: 0 auto; /* Center the grid within its container */
+            }
+        }
 /* END OF FILE index.css */
