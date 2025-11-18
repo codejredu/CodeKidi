@@ -1,79 +1,160 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Help</title>
-  <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 20px;
-      background-color: #FCF8F0;
-      font-family: 'Inter', sans-serif, system-ui;
-    }
-    h1 {
-      color: #ef4444;
-      font-size: 3rem;
-      font-weight: bold;
-      margin-bottom: 40px;
-    }
-    .videos-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 30px;
-      width: 100%;
-      max-width: 1200px;
-    }
-    .video-wrapper {
-      position: relative;
-      width: 100%;
-      padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
-      height: 0;
-      overflow: hidden;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    .video-wrapper iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Tutorial videos for working at codekidi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        
+        .video-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .video-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .video-frame {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border: none;
+        }
+        
+        .video-info {
+            padding: 20px;
+        }
+        
+        .video-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        
+        .video-number {
+            color: #888;
+            font-size: 0.9em;
+        }
+    </style>
 </head>
 <body>
-  <h1>Coming soon...</h1>
-  <div class="videos-container">
-
-    
-
-    
-    <div class="video-wrapper">
-      <iframe src="https://www.youtube.com/watch?v=xTjbuEdtlJ4" title="YouTube video 1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <div class="container">
+        <h1>🎬  Tutorial videos for working at codekidi</h1>
+        
+        <div class="videos-grid">
+            <!-- שורה 1 -->
+            <div class="video-card">
+                <iframe class="video-frame" src="https://www.youtube.com/embed/vuRXDgLqX3I" allowfullscreen></iframe>
+                <div class="video-info">
+                    <div class="video-title">Movie 1</div>
+                    <div class="video-number">Character rotation options </div>
+                </div>
+            </div>
+            
+            <div class="video-card">
+                <iframe class="video-frame" src="https://www.youtube.com/embed/kRUUKiAIsss" allowfullscreen></iframe>
+                <div class="video-info">
+                    <div class="video-title">Movie 2 </div>
+                    <div class="video-number">  Dance party on stage</div>
+                </div>
+            </div>
+            
+            <div class="video-card">
+                <iframe class="video-frame" src="https://www.youtube.com/embed/hiDvkwY-OGs" allowfullscreen></iframe>
+                <div class="video-info">
+                    <div class="video-title"> Movie 3 </div>
+                    <div class="video-number">Character resizing </div>
+                </div>
+            </div>
+            
+            <!-- שורה 2 -->
+            <div class="video-card">
+                <iframe class="video-frame" src="https://www.youtube.com/embed/CbVcKjLBfT0" allowfullscreen></iframe>
+                <div class="video-info">
+                    <div class="video-title"> Movie 4  </div>
+                    <div class="video-number">Changing backgroundsן</div>
+                </div>
+            </div>
+            
+            <div class="video-card">
+                <iframe class="video-frame" src="https://www.youtube.com/embed/IR5Gc_RdMNk" allowfullscreen></iframe>
+                <div class="video-info">
+                    <div class="video-title">Movie 5 </div>
+                    <div class="video-number">  Moving across the stage</div>
+                </div>
+            </div>
+            
+            <div class="video-card">
+                <iframe class="video-frame" src="https://www.youtube.com/embed/xBNdxXAtzyo" allowfullscreen></iframe>
+                <div class="video-info">
+                    <div class="video-title">Movie 6</div>
+                    <div class="video-number"> Character running competition </div>
+                </div>
+            </div>
+            
+            <!-- שורה 3 -->
+            <div class="video-card">
+                <iframe class="video-frame" src="https://www.youtube.com/embed/xTjbuEdtlJ4" allowfullscreen></iframe>
+                <div class="video-info">
+                    <div class="video-title">Movie 7 </div>
+                    <div class="video-number"> Airplane acrobatics in the air  </div>
+                </div>
+            </div>
+            
+            <div class="video-card">
+                <iframe class="video-frame" src="https://www.youtube.com/embed/ELnbMNNRzBo" allowfullscreen></iframe>
+                <div class="video-info">
+                    <div class="video-title">סMovie 8</div>
+                    <div class="video-number">Coming soon </div>
+                </div>
+            </div>
+            
+            <div class="video-card">
+                <iframe class="video-frame" src="https://www.youtube.com/embed/ELnbMNNRzBo" allowfullscreen></iframe>
+                <div class="video-info">
+                    <div class="video-title"> Movie 9</div>
+                    <div class="video-number">Coming soon  </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="video-wrapper">
-      <iframe src="https://www.youtube.com/embed/vuRXDgLqX3I" title="YouTube video 1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    </div>
-    <div class="video-wrapper">
-      <iframe src="https://www.youtube.com/embed/kRUUKiAIsss" title="YouTube video 2" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    </div>
-    <div class="video-wrapper">
-      <iframe src="https://www.youtube.com/embed/hiDvkwY-OGs" title="YouTube video 3" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    </div>
-    <div class="video-wrapper">
-      <iframe src="https://www.youtube.com/embed/CbVcKjLBfT0" title="YouTube video 4" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    </div>
-    <div class="video-wrapper">
-      <iframe src="https://www.youtube.com/watch?v=xTjbuEdtlJ4" title="YouTube video 5" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    </div>
-  </div>
 </body>
 </html>
