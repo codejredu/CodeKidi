@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מטריצת סרטוני YouTube</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        
+        .video-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .video-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .video-frame {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border: none;
+        }
+        
+        .video-info {
+            padding: 20px;
+        }
+        
+        .video-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        
+        .video-number {
+            color: #888;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 מטריצת סרטוני YouTube</h1>
+        
+        <div class="videos-grid">
+            <!-- שורה 1 -->
+            <div class="video-card">
+                <iframe class="video-frame" src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                <div class="video-info">
+                    <div class="video-title">סרטון 1</div>
+                    <div class="video-number">שינוי את הקישור כאן</div>
+                </div>
+            </div>
+            
+            <div class="video-card">
+                <iframe class="video-frame" src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                <div class="video-info">
+                    <div class="video-title">סרטון 2</div>
+                    <div class="video-number">שינוי את הקישור כאן</div>
+                </div>
+            </div>
+            
+            <div class="video-card">
+                <iframe class="video-frame" src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                <div class="video-info">
+                    <div class="video-title">סרטון 3</div>
+                    <div class="video-number">שינוי את הקישור כאן</div>
+                </div>
+            </div>
+            
+            <!-- שורה 2 -->
+            <div class="video-card">
+                <iframe class="video-frame" src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                <div class="video-info">
+                    <div class="video-title">סרטון 4</div>
+                    <div class="video-number">שינוי את הקישור כאן</div>
+                </div>
+            </div>
+            
+            <div class="video-card">
+                <iframe class="video-frame" src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                <div class="video-info">
+                    <div class="video-title">סרטון 5</div>
+                    <div class="video-number">שינוי את הקישור כאן</div>
+                </div>
+            </div>
+            
+            <div class="video-card">
+                <iframe class="video-frame" src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                <div class="video-info">
+                    <div class="video-title">סרטון 6</div>
+                    <div class="video-number">שינוי את הקישור כאן</div>
+                </div>
+            </div>
+            
+            <!-- שורה 3 -->
+            <div class="video-card">
+                <iframe class="video-frame" src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                <div class="video-info">
+                    <div class="video-title">סרטון 7</div>
+                    <div class="video-number">שינוי את הקישור כאן</div>
+                </div>
+            </div>
+            
+            <div class="video-card">
+                <iframe class="video-frame" src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                <div class="video-info">
+                    <div class="video-title">סרטון 8</div>
+                    <div class="video-number">שינוי את הקישור כאן</div>
+                </div>
+            </div>
+            
+            <div class="video-card">
+                <iframe class="video-frame" src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                <div class="video-info">
+                    <div class="video-title">סרטון 9</div>
+                    <div class="video-number">שינוי את הקישור כאן</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
