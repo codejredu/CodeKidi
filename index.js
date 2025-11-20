@@ -1,3 +1,5 @@
+
+
 // This file is intentionally left blank for future use.
 import { initCharacterCreator } from './Caracter.js';
 import { SpriteCenterEditor } from './center.js';
@@ -852,6 +854,7 @@ document.addEventListener('DOMContentLoaded', () => {
             zIndex: nextZIndex++,
             centerX: 0.5,
             centerY: 0.5,
+            activeKeyScriptCount: 0,
         };
         
         sprites[id] = spriteData;
@@ -940,6 +943,7 @@ document.addEventListener('DOMContentLoaded', () => {
         newData.y -= 20; // Offset up and to the right
         newData.zIndex = nextZIndex++;
         newData.animation = null; // Ensure animation is null for recreation
+        newData.activeKeyScriptCount = 0;
 
         // 3. Create the new sprite using the copied data
         loadSpriteFromData(newData);
@@ -3209,13 +3213,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleKeyPress(event) {
-        saveActiveSpriteWorkspace();
+        // 1. Ignore if typing in an input
+        if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;
 
         const keyMap = { 'SPACE': ' ', 'UP': 'ArrowUp', 'DOWN': 'ArrowDown', 'RIGHT': 'ArrowRight', 'LEFT': 'ArrowLeft' };
         const pressedKey = event.key;
         
+        // 2. Prevent default scrolling for arrow keys and space
+        // This fixes the issue where pressing keys moves the page.
+        if (Object.values(keyMap).includes(pressedKey) || pressedKey === ' ') {
+            event.preventDefault();
+        }
+
+        saveActiveSpriteWorkspace();
+
         const scriptsToRun = [];
         Object.values(sprites).forEach(sprite => {
+            // Locking mechanism: If a key script is already running on this sprite, ignore new key presses.
+            // This prevents overlapping actions like moving Right then Down instantly.
+            if (sprite.activeKeyScriptCount > 0) {
+                return;
+            }
+
             if (sprite.workspaceXml) {
                 const tempWorkspace = new Blockly.Workspace();
                 try {
@@ -3230,7 +3249,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     matchingScripts.forEach(startBlock => {
                         const generator = createGeneratorForStack(startBlock, sprite);
-                        if (generator) scriptsToRun.push(generator);
+                        if (generator) {
+                            // Increment counter when starting a script to lock the sprite
+                            sprite.activeKeyScriptCount = (sprite.activeKeyScriptCount || 0) + 1;
+                            
+                            // Wrap the generator to decrement the counter when finished, releasing the lock
+                            const wrappedGenerator = (function*() {
+                                try {
+                                    yield* generator;
+                                } finally {
+                                    sprite.activeKeyScriptCount--;
+                                    if (sprite.activeKeyScriptCount < 0) sprite.activeKeyScriptCount = 0;
+                                }
+                            })();
+                            scriptsToRun.push(wrappedGenerator);
+                        }
                     });
                 } catch(e) {
                     console.error("Error in handleKeyPress workspace processing:", e);
@@ -3272,6 +3305,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             sprite.isJumping = false; // Fail-safe to reset jump state for all sprites
+            sprite.activeKeyScriptCount = 0; // Reset key script lock
         });
 
         soundUIController.stopPreview();
@@ -3465,6 +3499,7 @@ document.addEventListener('DOMContentLoaded', () => {
         spriteData.speed = spriteData.speed || 'instant';
         spriteData.centerX = spriteData.centerX || 0.5;
         spriteData.centerY = spriteData.centerY || 0.5;
+        spriteData.activeKeyScriptCount = 0; // Initialize counter for locking
         sprites[id] = spriteData;
 
         createAndAttachSpriteCard(spriteData);
