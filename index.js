@@ -3779,7 +3779,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 height: parsedGif.height,
                 currentFrame: 0,
                 isPlaying: false,
-                previewIsPlaying: false,
+                previewIsPlaying: true,
                 timeSinceLastFrame: 0,
                 imageData: null, 
             };
