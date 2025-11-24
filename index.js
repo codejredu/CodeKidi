@@ -1468,7 +1468,7 @@ document.addEventListener('DOMContentLoaded', () => {
     Blockly.Blocks['event_when_bump'] = {
         init: function() {
             this.appendDummyInput()
-                .appendField(new Blockly.FieldImage("https://codejredu.github.io/test/assets/blocklyicon/collision.svg", 35, 35, "*"))
+                .appendField(new Blockly.FieldImage("https://codejredu.github.io/test/assets/blocklyicon/collision.svg", 50, 50, "*"))
                 .appendField(new FieldSprite(), 'TARGET_SPRITE')
                 .appendField('\u00A0\u00A0\u00A0\u00A0\u00A0');
             this.setNextStatement(true, null);
