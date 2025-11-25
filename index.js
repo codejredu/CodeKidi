@@ -1,6 +1,3 @@
-
-
-// This file is intentionally left blank for future use.
 import { initCharacterCreator } from './Caracter.js';
 import { SpriteCenterEditor } from './center.js';
 import soundUIController from './sound-ui.js';
@@ -670,18 +667,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // --- Rotation Logic ---
             let rotationTransform = '';
+            let bubbleCounterTransform = ''; // New variable to counteract parent transform on bubble
+
             switch(spriteData.rotationStyle) {
                 case 'left-right':
                     const normalizedDir = ((spriteData.direction % 360) + 360) % 360;
                     const isFlipped = normalizedDir >= 180;
                     rotationTransform = isFlipped ? 'scaleX(-1)' : 'scaleX(1)';
+                    // Counteract flip for bubble so text remains readable
+                    if (isFlipped) bubbleCounterTransform = 'scaleX(-1)';
                     break;
                 case 'dont-rotate':
                     rotationTransform = '';
                     break;
                 case 'all-around':
                 default:
-                    rotationTransform = `rotate(${spriteData.direction - 90}deg)`;
+                    const rotationDeg = spriteData.direction - 90;
+                    rotationTransform = `rotate(${rotationDeg}deg)`;
+                    // Counteract rotation for bubble so it stays upright
+                    bubbleCounterTransform = `rotate(${-rotationDeg}deg)`;
                     break;
             }
             // --- End Rotation Logic ---
@@ -701,6 +705,13 @@ document.addEventListener('DOMContentLoaded', () => {
             // Updated transform
             wrapper.style.transform = `translate(${translateX}%, ${translateY}%) ${rotationTransform}`;
             
+            // Update bubble transform to keep text upright/normal
+            const bubble = wrapper.querySelector('.speech-bubble');
+            if (bubble) {
+                // Keep the base translateX(-50%) for centering and add the counter transform
+                bubble.style.transform = `translateX(-50%) ${bubbleCounterTransform}`;
+            }
+
             // Position the main container which holds the wrapper
             container.style.transform = `translate(${stageX}px, ${stageY}px)`;
             container.style.zIndex = spriteData.zIndex;
@@ -1468,7 +1479,7 @@ document.addEventListener('DOMContentLoaded', () => {
     Blockly.Blocks['event_when_bump'] = {
         init: function() {
             this.appendDummyInput()
-                .appendField(new Blockly.FieldImage("https://codejredu.github.io/test/assets/blocklyicon/collision.svg", 50, 50, "*"))
+                .appendField(new Blockly.FieldImage("https://codejredu.github.io/test/assets/blocklyicon/collision.svg", 45, 45, "*"))
                 .appendField(new FieldSprite(), 'TARGET_SPRITE')
                 .appendField('\u00A0\u00A0\u00A0\u00A0\u00A0');
             this.setNextStatement(true, null);
