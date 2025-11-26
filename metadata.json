@@ -1,6 +1,6 @@
 {
-  "name": "CodeKidi1 with  scroll",
-  "description": "An empty app",
+  "name": "CodeKidi",
+  "description": "CODEKIDI for the web empowers young children (ages 6-12) to create their own interactive stories and games. By connecting graphical programming blocks, they can make characters move, jump, dance, and sing. Students can also customize characters, record their own voices and sounds, and incorporate images—all while developing problem-solving and computational thinking skills in a creative, engaging environment. CODEKIDI is designed for young learners seeking more advanced programming capabilities than ScratchJr offers.",
   "requestFramePermissions": [
     "microphone"
   ]
