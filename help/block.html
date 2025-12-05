@@ -205,8 +205,8 @@
 
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
         }
 
         /* Card Styles */
@@ -214,13 +214,16 @@
             background: var(--color-card);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
-            padding: 1.5rem;
+            padding: 2rem;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             overflow: hidden;
             position: relative;
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            align-items: center;
+            min-height: 240px;
         }
 
         .card::before {
@@ -256,7 +259,7 @@
             font-family: 'Outfit', sans-serif;
             font-size: 1.2rem;
             font-weight: 700;
-            margin-bottom: 0.8rem;
+            margin-bottom: 0.5rem;
             color: var(--color-text);
         }
 
@@ -264,19 +267,17 @@
             color: var(--color-text-muted);
             font-size: 0.95rem;
             line-height: 1.6;
-            margin-bottom: 1.2rem;
-            flex-grow: 1;
+            margin-bottom: 0.8rem;
         }
 
         .card-image {
             width: 100%;
-            height: 200px;
+            height: 240px;
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 1rem;
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
@@ -292,6 +293,12 @@
             transform: scale(1.05);
         }
 
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
         .card-tag {
             display: inline-block;
             padding: 0.4rem 0.8rem;
@@ -299,11 +306,20 @@
             border-radius: 6px;
             font-size: 0.8rem;
             font-weight: 600;
-            margin-top: 0.5rem;
             width: fit-content;
         }
 
         /* Responsive */
+        @media (max-width: 1024px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 1.8rem;
@@ -323,8 +339,13 @@
                 padding-bottom: 0.5rem;
             }
 
-            .cards-grid {
+            .card {
+                padding: 1.5rem;
                 grid-template-columns: 1fr;
+            }
+
+            .card-image {
+                height: 200px;
             }
         }
 
@@ -375,57 +396,69 @@
             </h2>
             <div class="cards-grid">
                 <div class="card" data-search="green flag click start">
+                    <div class="card-content">
+                        <h3 class="card-title">Start on Green Flag</h3>
+                        <p class="card-description">Start a script when the green flag is clicked</p>
+                        <span class="card-tag">🎬 Event</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image23.png" alt="start script when green flag">
                     </div>
-                    <h3 class="card-title">Start on Green Flag</h3>
-                    <p class="card-description">Start a script when the green flag is clicked</p>
-                    <span class="card-tag">🎬 Event</span>
                 </div>
 
                 <div class="card" data-search="sprite click">
+                    <div class="card-content">
+                        <h3 class="card-title">Start on Sprite Click</h3>
+                        <p class="card-description">Start a script when the sprite is clicked</p>
+                        <span class="card-tag">🎯 Event</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image13.png" alt="start when sprite clicked">
                     </div>
-                    <h3 class="card-title">Start on Sprite Click</h3>
-                    <p class="card-description">Start a script when the sprite is clicked</p>
-                    <span class="card-tag">🎯 Event</span>
                 </div>
 
                 <div class="card" data-search="key press keyboard">
+                    <div class="card-content">
+                        <h3 class="card-title">Start on Key Press</h3>
+                        <p class="card-description">Start a script when a key is pressed</p>
+                        <span class="card-tag">⌨️ Event</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image17.png" alt="key press">
                     </div>
-                    <h3 class="card-title">Start on Key Press</h3>
-                    <p class="card-description">Start a script when a key is pressed</p>
-                    <span class="card-tag">⌨️ Event</span>
                 </div>
 
                 <div class="card" data-search="sprite touch collision">
+                    <div class="card-content">
+                        <h3 class="card-title">Start on Sprite Touch</h3>
+                        <p class="card-description">Start a script when sprite touches another sprite</p>
+                        <span class="card-tag">💥 Event</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image11.png" alt="sprite touch">
                     </div>
-                    <h3 class="card-title">Start on Sprite Touch</h3>
-                    <p class="card-description">Start a script when sprite touches another sprite</p>
-                    <span class="card-tag">💥 Event</span>
                 </div>
 
                 <div class="card" data-search="broadcast message">
+                    <div class="card-content">
+                        <h3 class="card-title">Broadcast Message</h3>
+                        <p class="card-description">Send a message to all sprites</p>
+                        <span class="card-tag">📢 Event</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image1.png" alt="broadcast">
                     </div>
-                    <h3 class="card-title">Broadcast Message</h3>
-                    <p class="card-description">Send a message to all sprites</p>
-                    <span class="card-tag">📢 Event</span>
                 </div>
 
                 <div class="card" data-search="receive message">
+                    <div class="card-content">
+                        <h3 class="card-title">Receive Message</h3>
+                        <p class="card-description">Start a script when a specific message is received</p>
+                        <span class="card-tag">📨 Event</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image8.png" alt="receive message">
                     </div>
-                    <h3 class="card-title">Receive Message</h3>
-                    <p class="card-description">Start a script when a specific message is received</p>
-                    <span class="card-tag">📨 Event</span>
                 </div>
             </div>
         </section>
@@ -438,30 +471,36 @@
             </h2>
             <div class="cards-grid">
                 <div class="card" data-search="wait pause delay time">
+                    <div class="card-content">
+                        <h3 class="card-title">Wait</h3>
+                        <p class="card-description">Pause the script for a specified amount of time</p>
+                        <span class="card-tag">⏱️ Control</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image26.png" alt="wait">
                     </div>
-                    <h3 class="card-title">Wait</h3>
-                    <p class="card-description">Pause the script for a specified amount of time</p>
-                    <span class="card-tag">⏱️ Control</span>
                 </div>
 
                 <div class="card" data-search="repeat loop times">
+                    <div class="card-content">
+                        <h3 class="card-title">Repeat</h3>
+                        <p class="card-description">Run the blocks inside a specified number of times</p>
+                        <span class="card-tag">🔁 Control</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image22.png" alt="repeat">
                     </div>
-                    <h3 class="card-title">Repeat</h3>
-                    <p class="card-description">Run the blocks inside a specified number of times</p>
-                    <span class="card-tag">🔁 Control</span>
                 </div>
 
                 <div class="card" data-search="forever loop repeat">
+                    <div class="card-content">
+                        <h3 class="card-title">Forever</h3>
+                        <p class="card-description">Run the script over and over</p>
+                        <span class="card-tag">♾️ Control</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image5.png" alt="forever loop">
                     </div>
-                    <h3 class="card-title">Forever</h3>
-                    <p class="card-description">Run the script over and over</p>
-                    <span class="card-tag">♾️ Control</span>
                 </div>
             </div>
         </section>
@@ -474,93 +513,113 @@
             </h2>
             <div class="cards-grid">
                 <div class="card" data-search="say speak message bubble">
+                    <div class="card-content">
+                        <h3 class="card-title">Say</h3>
+                        <p class="card-description">Show a message in a speech bubble for a specific time</p>
+                        <span class="card-tag">💬 Appearance</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image7.png" alt="say">
                     </div>
-                    <h3 class="card-title">Say</h3>
-                    <p class="card-description">Show a message in a speech bubble for a specific time</p>
-                    <span class="card-tag">💬 Appearance</span>
                 </div>
 
                 <div class="card" data-search="think bubble message">
+                    <div class="card-content">
+                        <h3 class="card-title">Think</h3>
+                        <p class="card-description">Show a message in a thought bubble. Works with wait block</p>
+                        <span class="card-tag">🤔 Appearance</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image6.png" alt="think">
                     </div>
-                    <h3 class="card-title">Think</h3>
-                    <p class="card-description">Show a message in a thought bubble. Works with wait block</p>
-                    <span class="card-tag">🤔 Appearance</span>
                 </div>
 
                 <div class="card" data-search="show sprite visible">
+                    <div class="card-content">
+                        <h3 class="card-title">Show</h3>
+                        <p class="card-description">Show the sprite</p>
+                        <span class="card-tag">👁️ Appearance</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image2.png" alt="show">
                     </div>
-                    <h3 class="card-title">Show</h3>
-                    <p class="card-description">Show the sprite</p>
-                    <span class="card-tag">👁️ Appearance</span>
                 </div>
 
                 <div class="card" data-search="hide sprite invisible">
+                    <div class="card-content">
+                        <h3 class="card-title">Hide</h3>
+                        <p class="card-description">Hide the sprite</p>
+                        <span class="card-tag">👁️ Appearance</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image20.png" alt="hide">
                     </div>
-                    <h3 class="card-title">Hide</h3>
-                    <p class="card-description">Hide the sprite</p>
-                    <span class="card-tag">👁️ Appearance</span>
                 </div>
 
                 <div class="card" data-search="size grow increase">
+                    <div class="card-content">
+                        <h3 class="card-title">Grow</h3>
+                        <p class="card-description">Increase the character's size</p>
+                        <span class="card-tag">📏 Appearance</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image25.png" alt="grow">
                     </div>
-                    <h3 class="card-title">Grow</h3>
-                    <p class="card-description">Increase the character's size</p>
-                    <span class="card-tag">📏 Appearance</span>
                 </div>
 
                 <div class="card" data-search="size shrink decrease">
+                    <div class="card-content">
+                        <h3 class="card-title">Shrink</h3>
+                        <p class="card-description">Decrease the character's size</p>
+                        <span class="card-tag">📏 Appearance</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image3.png" alt="shrink">
                     </div>
-                    <h3 class="card-title">Shrink</h3>
-                    <p class="card-description">Decrease the character's size</p>
-                    <span class="card-tag">📏 Appearance</span>
                 </div>
 
                 <div class="card" data-search="size percentage">
+                    <div class="card-content">
+                        <h3 class="card-title">Set Size</h3>
+                        <p class="card-description">Set the character size in percentage</p>
+                        <span class="card-tag">📏 Appearance</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image12.png" alt="set size">
                     </div>
-                    <h3 class="card-title">Set Size</h3>
-                    <p class="card-description">Set the character size in percentage</p>
-                    <span class="card-tag">📏 Appearance</span>
                 </div>
 
                 <div class="card" data-search="layer z-index order">
+                    <div class="card-content">
+                        <h3 class="card-title">Layer Order</h3>
+                        <p class="card-description">Change the layer order of the sprite</p>
+                        <span class="card-tag">📑 Appearance</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image19.png" alt="layer">
                     </div>
-                    <h3 class="card-title">Layer Order</h3>
-                    <p class="card-description">Change the layer order of the sprite</p>
-                    <span class="card-tag">📑 Appearance</span>
                 </div>
 
                 <div class="card" data-search="scroll background pan">
+                    <div class="card-content">
+                        <h3 class="card-title">Scroll Background</h3>
+                        <p class="card-description">Make the background scroll in the selected direction</p>
+                        <span class="card-tag">🎬 Appearance</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image15.png" alt="scroll">
                     </div>
-                    <h3 class="card-title">Scroll Background</h3>
-                    <p class="card-description">Make the background scroll in the selected direction</p>
-                    <span class="card-tag">🎬 Appearance</span>
                 </div>
 
                 <div class="card" data-search="stop scroll">
+                    <div class="card-content">
+                        <h3 class="card-title">Stop Scroll</h3>
+                        <p class="card-description">Stop scrolling</p>
+                        <span class="card-tag">🎬 Appearance</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image24.png" alt="stop scroll">
                     </div>
-                    <h3 class="card-title">Stop Scroll</h3>
-                    <p class="card-description">Stop scrolling</p>
-                    <span class="card-tag">🎬 Appearance</span>
                 </div>
             </div>
         </section>
@@ -573,12 +632,14 @@
             </h2>
             <div class="cards-grid">
                 <div class="card" data-search="sound play audio">
+                    <div class="card-content">
+                        <h3 class="card-title">Play Sound</h3>
+                        <p class="card-description">Select selected sound</p>
+                        <span class="card-tag">🔊 Sound</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image9.png" alt="play sound">
                     </div>
-                    <h3 class="card-title">Play Sound</h3>
-                    <p class="card-description">Select selected sound</p>
-                    <span class="card-tag">🔊 Sound</span>
                 </div>
             </div>
         </section>
@@ -591,48 +652,58 @@
             </h2>
             <div class="cards-grid">
                 <div class="card" data-search="add addition plus">
+                    <div class="card-content">
+                        <h3 class="card-title">Addition</h3>
+                        <p class="card-description">Basic Math Addition. Drag the number to the input field</p>
+                        <span class="card-tag">➕ Math</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image27.png" alt="addition">
                     </div>
-                    <h3 class="card-title">Addition</h3>
-                    <p class="card-description">Basic Math Addition. Drag the number to the input field</p>
-                    <span class="card-tag">➕ Math</span>
                 </div>
 
                 <div class="card" data-search="subtract subtraction minus">
+                    <div class="card-content">
+                        <h3 class="card-title">Subtraction</h3>
+                        <p class="card-description">Basic Math Subtraction</p>
+                        <span class="card-tag">➖ Math</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image4.png" alt="subtraction">
                     </div>
-                    <h3 class="card-title">Subtraction</h3>
-                    <p class="card-description">Basic Math Subtraction</p>
-                    <span class="card-tag">➖ Math</span>
                 </div>
 
                 <div class="card" data-search="multiply multiplication times">
+                    <div class="card-content">
+                        <h3 class="card-title">Multiplication</h3>
+                        <p class="card-description">Basic Math Multiplication</p>
+                        <span class="card-tag">✖️ Math</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image10.png" alt="multiplication">
                     </div>
-                    <h3 class="card-title">Multiplication</h3>
-                    <p class="card-description">Basic Math Multiplication</p>
-                    <span class="card-tag">✖️ Math</span>
                 </div>
 
                 <div class="card" data-search="divide division">
+                    <div class="card-content">
+                        <h3 class="card-title">Division</h3>
+                        <p class="card-description">Basic Math Division</p>
+                        <span class="card-tag">➗ Math</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image18.png" alt="division">
                     </div>
-                    <h3 class="card-title">Division</h3>
-                    <p class="card-description">Basic Math Division</p>
-                    <span class="card-tag">➗ Math</span>
                 </div>
 
                 <div class="card" data-search="number">
+                    <div class="card-content">
+                        <h3 class="card-title">Number</h3>
+                        <p class="card-description">A numeric value block</p>
+                        <span class="card-tag">🔢 Math</span>
+                    </div>
                     <div class="card-image">
                         <img src="https://codekidi.org/help/image14.png" alt="number">
                     </div>
-                    <h3 class="card-title">Number</h3>
-                    <p class="card-description">A numeric value block</p>
-                    <span class="card-tag">🔢 Math</span>
                 </div>
             </div>
         </section>
