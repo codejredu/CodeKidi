@@ -23,12 +23,51 @@
             margin: 0 auto;
         }
         
+        .header-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+        }
+        
         h1 {
-            text-align: center;
             color: white;
-            margin-bottom: 40px;
             font-size: 2.5em;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        @keyframes blink {
+            0%, 100% {
+                background: #FFD700;
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 6px 20px rgba(0, 0, 0, 0.3);
+            }
+            50% {
+                background: #FFA500;
+                box-shadow: 0 0 30px rgba(255, 165, 0, 1), 0 6px 25px rgba(0, 0, 0, 0.4);
+            }
+        }
+        
+        .commands-link {
+            background: #FFD700;
+            color: #333;
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            animation: blink 1.5s infinite;
+            border: 3px solid #FF6B00;
+        }
+        
+        .commands-link:hover {
+            transform: scale(1.1);
+            animation: blink 0.8s infinite;
         }
         
         .videos-grid {
@@ -75,11 +114,34 @@
             color: #e0e0e0;
             font-size: 0.9em;
         }
+        
+        @media (max-width: 768px) {
+            .videos-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .header-wrapper {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .videos-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎬 Tutorial videos for working at codekidi</h1>
+        <div class="header-wrapper">
+            <h1>🎬 Tutorial videos for working at codekidi</h1>
+            <a href="https://codekidi.org/help/block.html" class="commands-link">📋 Commands Guide</a>
+        </div>
         
         <div class="videos-grid">
             <!-- שורה 1 -->
