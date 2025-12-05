@@ -164,6 +164,12 @@
             background: #ffa502;
         }
 
+        .card-category.motion {
+            background: #ffffff;
+            color: #2d3436;
+            border: 1px solid #dfe6e9;
+        }
+
         .card-category.appearance {
             background: #4ecdc4;
         }
@@ -298,11 +304,11 @@
         <!-- Statistics -->
         <div class="stats">
             <div class="stat-item">
-                <h3>25</h3>
+                <h3>35</h3>
                 <p>Blocks</p>
             </div>
             <div class="stat-item">
-                <h3>5</h3>
+                <h3>6</h3>
                 <p>Categories</p>
             </div>
             <div class="stat-item">
@@ -317,6 +323,7 @@
                 <button class="filter-btn active" data-filter="all">All</button>
                 <button class="filter-btn" data-filter="event">Events</button>
                 <button class="filter-btn" data-filter="control">Control</button>
+                <button class="filter-btn" data-filter="motion">Motion</button>
                 <button class="filter-btn" data-filter="appearance">Appearance</button>
                 <button class="filter-btn" data-filter="sound">Sound</button>
                 <button class="filter-btn" data-filter="math">Math</button>
@@ -352,25 +359,35 @@
             { id: 4, title: "Touch Event", description: "Start a script when sprite touches the selected sprite", category: "event", image: "https://codekidi.org/help/image11.png" },
             { id: 5, title: "Broadcast Message", description: "Send message to all sprites", category: "event", image: "https://codekidi.org/help/image1.png" },
             { id: 6, title: "Receive Message", description: "Start a script when a specific message is received", category: "event", image: "https://codekidi.org/help/image8.png" },
-            { id: 7, title: "Wait", description: "Pauses the script for a specified amount of time (in tenths of seconds)", category: "control", image: "https://codekidi.org/help/image26.png" },
-            { id: 8, title: "Repeat", description: "Runs the blocks inside a specified number of times", category: "control", image: "https://codekidi.org/help/image22.png" },
-            { id: 9, title: "Forever Loop", description: "Runs the script over and over", category: "control", image: "https://codekidi.org/help/image5.png" },
-            { id: 10, title: "Say", description: "Shows a specified message in a speech bubble above the character", category: "appearance", image: "https://codekidi.org/help/image7.png" },
-            { id: 11, title: "Say and Wait", description: "Shows a message in a speech bubble. Works together with the wait block", category: "appearance", image: "https://codekidi.org/help/image6.png" },
-            { id: 12, title: "Show", description: "Show the sprite", category: "appearance", image: "https://codekidi.org/help/image2.png" },
-            { id: 13, title: "Hide", description: "Hide the sprite", category: "appearance", image: "https://codekidi.org/help/image20.png" },
-            { id: 14, title: "Grow", description: "Increases the character's size", category: "appearance", image: "https://codekidi.org/help/image25.png" },
-            { id: 15, title: "Shrink", description: "Decreases the character's size", category: "appearance", image: "https://codekidi.org/help/image3.png" },
-            { id: 16, title: "Set Size", description: "Set the character size in percentage", category: "appearance", image: "https://codekidi.org/help/image12.png" },
-            { id: 17, title: "Go to Front", description: "Change the layer order of the sprite", category: "appearance", image: "https://codekidi.org/help/image19.png" },
-            { id: 18, title: "Scroll Background", description: "Make the background scroll in the selected direction and speed", category: "appearance", image: "https://codekidi.org/help/image15.png" },
-            { id: 19, title: "Stop Scrolling", description: "Stop scrolling", category: "appearance", image: "https://codekidi.org/help/image24.png" },
-            { id: 20, title: "Play Sound", description: "Select and play a sound", category: "sound", image: "https://codekidi.org/help/image9.png" },
-            { id: 21, title: "Addition", description: "Basic math addition - drag the number to the input field", category: "math", image: "https://codekidi.org/help/image27.png" },
-            { id: 22, title: "Subtraction", description: "Basic math subtraction", category: "math", image: "https://codekidi.org/help/image4.png" },
-            { id: 23, title: "Multiplication", description: "Basic math multiplication", category: "math", image: "https://codekidi.org/help//image10.png" },
-            { id: 24, title: "Division", description: "Basic math division", category: "math", image: "https://codekidi.org/help/image18.png" },
-            { id: 25, title: "Number", description: "Number block", category: "math", image: "https://codekidi.org/help/image14.png" }
+            { id: 7, title: "Move Forward", description: "Move the sprite in direction it is facing", category: "motion", image: "https://codekidi.org/help/image30.png" },
+            { id: 8, title: "Set Move Speed", description: "Set how fast the sprite move with move block", category: "motion", image: "https://codekidi.org/help/image31.png" },
+            { id: 9, title: "Turn Right", description: "Turn the sprite to the right", category: "motion", image: "https://codekidi.org/help/image33.png" },
+            { id: 10, title: "Turn Left", description: "Turn the sprite to the left", category: "motion", image: "https://codekidi.org/help/image34.png" },
+            { id: 11, title: "Set Direction", description: "Set the direction and rotation style", category: "motion", image: "https://codekidi.org/help/image35.png" },
+            { id: 12, title: "Go to Location", description: "Move the sprite to specific location on stage", category: "motion", image: "https://codekidi.org/help/image36.png" },
+            { id: 13, title: "Glide Smoothly", description: "Glide the sprite smoothly to specific location on stage", category: "motion", image: "https://codekidi.org/help/image37.png" },
+            { id: 14, title: "Jump Height", description: "Make the sprite jump to certain height", category: "motion", image: "https://codekidi.org/help/image38.png" },
+            { id: 15, title: "X Position", description: "Return the sprite x position", category: "motion", image: "https://codekidi.org/help/image39.png" },
+            { id: 16, title: "Y Position", description: "Return the sprite y position", category: "motion", image: "https://codekidi.org/help/image40.png" },
+            { id: 17, title: "Wait", description: "Pauses the script for a specified amount of time (in tenths of seconds)", category: "control", image: "https://codekidi.org/help/image26.png" },
+            { id: 18, title: "Repeat", description: "Runs the blocks inside a specified number of times", category: "control", image: "https://codekidi.org/help/image22.png" },
+            { id: 19, title: "Forever Loop", description: "Runs the script over and over", category: "control", image: "https://codekidi.org/help/image5.png" },
+            { id: 20, title: "Say", description: "Shows a specified message in a speech bubble above the character", category: "appearance", image: "https://codekidi.org/help/image7.png" },
+            { id: 21, title: "Say and Wait", description: "Shows a message in a speech bubble. Works together with the wait block", category: "appearance", image: "https://codekidi.org/help/image6.png" },
+            { id: 22, title: "Show", description: "Show the sprite", category: "appearance", image: "https://codekidi.org/help/image2.png" },
+            { id: 23, title: "Hide", description: "Hide the sprite", category: "appearance", image: "https://codekidi.org/help/image20.png" },
+            { id: 24, title: "Grow", description: "Increases the character's size", category: "appearance", image: "https://codekidi.org/help/image25.png" },
+            { id: 25, title: "Shrink", description: "Decreases the character's size", category: "appearance", image: "https://codekidi.org/help/image3.png" },
+            { id: 26, title: "Set Size", description: "Set the character size in percentage", category: "appearance", image: "https://codekidi.org/help/image12.png" },
+            { id: 27, title: "Go to Front", description: "Change the layer order of the sprite", category: "appearance", image: "https://codekidi.org/help/image19.png" },
+            { id: 28, title: "Scroll Background", description: "Make the background scroll in the selected direction and speed", category: "appearance", image: "https://codekidi.org/help/image15.png" },
+            { id: 29, title: "Stop Scrolling", description: "Stop scrolling", category: "appearance", image: "https://codekidi.org/help/image24.png" },
+            { id: 30, title: "Play Sound", description: "Select and play a sound", category: "sound", image: "https://codekidi.org/help/image9.png" },
+            { id: 31, title: "Addition", description: "Basic math addition - drag the number to the input field", category: "math", image: "https://codekidi.org/help/image27.png" },
+            { id: 32, title: "Subtraction", description: "Basic math subtraction", category: "math", image: "https://codekidi.org/help/image4.png" },
+            { id: 33, title: "Multiplication", description: "Basic math multiplication", category: "math", image: "https://codekidi.org/help//image10.png" },
+            { id: 34, title: "Division", description: "Basic math division", category: "math", image: "https://codekidi.org/help/image18.png" },
+            { id: 35, title: "Number", description: "Number block", category: "math", image: "https://codekidi.org/help/image14.png" }
         ];
 
         let currentFilter = 'all';
@@ -418,6 +435,7 @@
             const names = {
                 event: 'Events',
                 control: 'Control',
+                motion: 'Motion',
                 appearance: 'Appearance',
                 sound: 'Sound',
                 math: 'Math'
