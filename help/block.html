@@ -1,775 +1,334 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeKidi - Help System</title>
+    <title>Scratch Script Guide</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         :root {
-            --color-events: #FF6B6B;
-            --color-control: #4ECDC4;
-            --color-appearance: #95E1D3;
-            --color-sound: #B197FC;
-            --color-math: #FFB84D;
-            --color-bg: #0F172A;
-            --color-card: #1E293B;
-            --color-text: #F1F5F9;
-            --color-text-muted: #94A3B8;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            --shadow-hover: 0 20px 50px rgba(0, 0, 0, 0.5);
+            --primary-color: #f0f4f8;
+            --border-color: #d1d5db;
+            --text-color: #333;
+            --hover-bg: #e2e8f0;
         }
-
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Outfit:wght@200;400;700&display=swap');
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, var(--color-bg) 0%, #1a2744 100%);
-            color: var(--color-text);
-            min-height: 100vh;
-            overflow-x: hidden;
+            font-family: system-ui, -apple-system, sans-serif;
+            line-height: 1.5;
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            background-color: #fff;
         }
 
-        /* Header */
-        header {
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
-            backdrop-filter: blur(10px);
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-            padding: 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            animation: slideDown 0.6s ease-out;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #FF6B6B, #FFB84D, #4ECDC4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .subtitle {
-            color: var(--color-text-muted);
-            font-size: 1.1rem;
-            font-weight: 300;
-        }
-
-        /* Search Bar */
-        .search-container {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-
-        .search-box {
-            position: relative;
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            min-width: 250px;
-            padding: 1rem 1.5rem;
-            background: rgba(30, 41, 59, 0.8);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            color: var(--color-text);
-            font-size: 1rem;
-            font-family: 'Poppins', sans-serif;
-            transition: all 0.3s ease;
-        }
-
-        input[type="text"]::placeholder {
-            color: var(--color-text-muted);
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: var(--color-events);
-            background: rgba(30, 41, 59, 1);
-            box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
-        }
-
-        /* Filter Buttons */
-        .filter-buttons {
-            display: flex;
-            gap: 0.8rem;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            padding: 0.75rem 1.25rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            color: var(--color-text);
-            font-family: 'Poppins', sans-serif;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .filter-btn:hover {
-            border-color: rgba(255, 255, 255, 0.4);
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-2px);
-        }
-
-        .filter-btn.active {
-            background: var(--color-events);
-            border-color: var(--color-events);
-            color: white;
-        }
-
-        /* Main Content */
         .container {
-            max-width: 1400px;
+            max-width: 900px;
             margin: 0 auto;
-            padding: 0 2rem 3rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        .category-section {
-            margin-bottom: 4rem;
-            animation: fadeInUp 0.8s ease-out forwards;
-            opacity: 0;
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: bold;
         }
 
-        .category-section:nth-child(1) { animation-delay: 0.1s; }
-        .category-section:nth-child(2) { animation-delay: 0.2s; }
-        .category-section:nth-child(3) { animation-delay: 0.3s; }
-        .category-section:nth-child(4) { animation-delay: 0.4s; }
-        .category-section:nth-child(5) { animation-delay: 0.5s; }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .category-title {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
+        /* Grid Layout replacing the Table */
+        .grid-row {
+            display: grid;
+            grid-template-columns: 1fr 200px; /* Text takes space, Image takes fixed width */
             gap: 1rem;
-        }
-
-        .category-badge {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .events .category-badge { background: var(--color-events); }
-        .control .category-badge { background: var(--color-control); }
-        .appearance .category-badge { background: var(--color-appearance); }
-        .sound .category-badge { background: var(--color-sound); }
-        .math .category-badge { background: var(--color-math); }
-
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 2rem;
-        }
-
-        /* Card Styles */
-        .card {
-            background: var(--color-card);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 2rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            overflow: hidden;
-            position: relative;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem;
             align-items: center;
-            min-height: 240px;
+            background-color: white;
+            transition: background-color 0.2s;
         }
 
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--color-accent), transparent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
+        .grid-row:last-child {
+            border-bottom: none;
         }
 
-        .events .card::before { --color-accent: var(--color-events); }
-        .control .card::before { --color-accent: var(--color-control); }
-        .appearance .card::before { --color-accent: var(--color-appearance); }
-        .sound .card::before { --color-accent: var(--color-sound); }
-        .math .card::before { --color-accent: var(--color-math); }
-
-        .card:hover::before {
-            opacity: 1;
+        .grid-row:nth-child(even) {
+            background-color: var(--primary-color);
         }
 
-        .card:hover {
-            border-color: rgba(255, 255, 255, 0.2);
-            background: rgba(30, 41, 59, 0.95);
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-hover);
+        .grid-row:hover {
+            background-color: var(--hover-bg);
         }
 
-        .card-title {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: var(--color-text);
+        .description {
+            font-size: 1.1rem;
         }
 
-        .card-description {
-            color: var(--color-text-muted);
-            font-size: 0.95rem;
-            line-height: 1.6;
-            margin-bottom: 0.8rem;
-        }
-
-        .card-image {
-            width: 100%;
-            height: 240px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-            border-radius: 12px;
+        .image-container {
             display: flex;
-            align-items: center;
             justify-content: center;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            align-items: center;
         }
 
-        .card-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
         }
 
-        .card:hover .card-image img {
-            transform: scale(1.05);
+        /* Highlights broken local images */
+        img[src^="file:"] {
+            border: 2px dashed red;
+            opacity: 0.5;
         }
-
-        .card-content {
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-        }
-
-        .card-tag {
-            display: inline-block;
-            padding: 0.4rem 0.8rem;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
+        
+        .broken-link-note {
+            color: red;
             font-size: 0.8rem;
-            font-weight: 600;
-            width: fit-content;
+            display: block;
+            margin-top: 5px;
         }
 
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .cards-grid {
-                grid-template-columns: 1fr;
+        /* Mobile Responsiveness */
+        @media (max-width: 600px) {
+            .grid-row {
+                grid-template-columns: 1fr; /* Stack vertically on mobile */
+                text-align: center;
             }
-
-            .card {
-                grid-template-columns: 1fr;
+            
+            .image-container {
+                justify-content: center;
+                margin-top: 10px;
             }
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 1.8rem;
-            }
-
-            .search-box {
-                flex-direction: column;
-            }
-
-            input[type="text"] {
-                min-width: 100%;
-            }
-
-            .filter-buttons {
-                justify-content: flex-start;
-                overflow-x: auto;
-                padding-bottom: 0.5rem;
-            }
-
-            .card {
-                padding: 1.5rem;
-                grid-template-columns: 1fr;
-            }
-
-            .card-image {
-                height: 200px;
-            }
-        }
-
-        /* Hide class */
-        .hidden {
-            display: none !important;
-        }
-
-        /* Smooth scrolling */
-        html {
-            scroll-behavior: smooth;
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="header-content">
-            <h1>🚀 CodeKidi - Help System</h1>
-            <p class="subtitle">Explore all your blocks and features</p>
-        </div>
-    </header>
-
-    <div class="search-container">
-        <div class="search-box">
-            <input 
-                type="text" 
-                id="searchInput" 
-                placeholder="Search blocks..."
-                aria-label="Search blocks"
-            >
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="events">Events</button>
-                <button class="filter-btn" data-filter="control">Control</button>
-                <button class="filter-btn" data-filter="appearance">Appearance</button>
-                <button class="filter-btn" data-filter="sound">Sound</button>
-                <button class="filter-btn" data-filter="math">Math</button>
-            </div>
-        </div>
-    </div>
 
     <div class="container">
-        <!-- Events Section -->
-        <section class="category-section events" data-category="events">
-            <h2 class="category-title">
-                <span class="category-badge"></span>
-                Events & Triggers
-            </h2>
-            <div class="cards-grid">
-                <div class="card" data-search="green flag click start">
-                    <div class="card-content">
-                        <h3 class="card-title">Start on Green Flag</h3>
-                        <p class="card-description">Start a script when the green flag is clicked</p>
-                        <span class="card-tag">🎬 Event</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image23.png" alt="start script when green flag">
-                    </div>
-                </div>
+        <div class="header">
+            Scratch Script Commands Guide
+        </div>
 
-                <div class="card" data-search="sprite click">
-                    <div class="card-content">
-                        <h3 class="card-title">Start on Sprite Click</h3>
-                        <p class="card-description">Start a script when the sprite is clicked</p>
-                        <span class="card-tag">🎯 Event</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image13.png" alt="start when sprite clicked">
-                    </div>
-                </div>
+        <!-- Row 1 -->
+        <div class="grid-row">
+            <div class="description">Start script when the green flag is clicked</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image23.png" alt="Green flag block" width="120" height="66">
+            </div>
+        </div>
 
-                <div class="card" data-search="key press keyboard">
-                    <div class="card-content">
-                        <h3 class="card-title">Start on Key Press</h3>
-                        <p class="card-description">Start a script when a key is pressed</p>
-                        <span class="card-tag">⌨️ Event</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image17.png" alt="key press">
-                    </div>
-                </div>
+        <!-- Row 2 -->
+        <div class="grid-row">
+            <div class="description">Start a script when sprite is clicked</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image13.png" alt="Start on click block" width="118" height="64">
+            </div>
+        </div>
 
-                <div class="card" data-search="sprite touch collision">
-                    <div class="card-content">
-                        <h3 class="card-title">Start on Sprite Touch</h3>
-                        <p class="card-description">Start a script when sprite touches another sprite</p>
-                        <span class="card-tag">💥 Event</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image11.png" alt="sprite touch">
-                    </div>
-                </div>
+        <!-- Row 3 -->
+        <div class="grid-row">
+            <div class="description">Start scripts when selected key is pressed</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image17.png" alt="Key press block" width="180" height="68">
+            </div>
+        </div>
 
-                <div class="card" data-search="broadcast message">
-                    <div class="card-content">
-                        <h3 class="card-title">Broadcast Message</h3>
-                        <p class="card-description">Send a message to all sprites</p>
-                        <span class="card-tag">📢 Event</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image1.png" alt="broadcast">
-                    </div>
-                </div>
+        <!-- Row 4 -->
+        <div class="grid-row">
+            <div class="description">Start a script when sprite touches the selected sprite</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image11.png" alt="Touch event block" width="189" height="88">
+            </div>
+        </div>
 
-                <div class="card" data-search="receive message">
-                    <div class="card-content">
-                        <h3 class="card-title">Receive Message</h3>
-                        <p class="card-description">Start a script when a specific message is received</p>
-                        <span class="card-tag">📨 Event</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image8.png" alt="receive message">
-                    </div>
+        <!-- Row 5 -->
+        <div class="grid-row">
+            <div class="description">Send message to all sprites</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image1.png" alt="Broadcast message block" width="156" height="66">
+            </div>
+        </div>
+
+        <!-- Row 6 -->
+        <div class="grid-row">
+            <div class="description">Start a script when a specific message is received</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image8.png" alt="Receive message block" width="154" height="65">
+            </div>
+        </div>
+
+        <!-- Row 7 -->
+        <div class="grid-row">
+            <div class="description">Pauses the script for a specified amount of time (in tenths of seconds).</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image26.png" alt="Wait block" width="102" height="64">
+            </div>
+        </div>
+
+        <!-- Row 8 -->
+        <div class="grid-row">
+            <div class="description">Runs the blocks inside a specified number of times</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image22.png" alt="Repeat block" width="164" height="116">
+            </div>
+        </div>
+
+        <!-- Row 9 -->
+        <div class="grid-row">
+            <div class="description">Runs the script over and over</div>
+            <div class="image-container">
+                <!-- NOTE: This image is local on your computer and won't work online -->
+                <div>
+                    <img src="https://codekidi.org/help/image5.png" alt="Forever loop block" width="166" height="114">
+                   
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- Control Section -->
-        <section class="category-section control" data-category="control">
-            <h2 class="category-title">
-                <span class="category-badge"></span>
-                Control & Flow
-            </h2>
-            <div class="cards-grid">
-                <div class="card" data-search="wait pause delay time">
-                    <div class="card-content">
-                        <h3 class="card-title">Wait</h3>
-                        <p class="card-description">Pause the script for a specified amount of time</p>
-                        <span class="card-tag">⏱️ Control</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image26.png" alt="wait">
-                    </div>
-                </div>
+        <!-- Row 10 -->
+        <div class="grid-row">
+            <div class="description">Shows a specified message in a speech bubble above the character for specific time</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image7.png" alt="Say block" width="238" height="71">
+            </div>
+        </div>
 
-                <div class="card" data-search="repeat loop times">
-                    <div class="card-content">
-                        <h3 class="card-title">Repeat</h3>
-                        <p class="card-description">Run the blocks inside a specified number of times</p>
-                        <span class="card-tag">🔁 Control</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image22.png" alt="repeat">
-                    </div>
-                </div>
+        <!-- Row 11 -->
+        <div class="grid-row">
+            <div class="description">Shows a specified message in a speech bubble above the character for specific time.<br>This block works together with the wait block.</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image6.png" alt="Say and wait block" width="184" height="66">
+            </div>
+        </div>
 
-                <div class="card" data-search="forever loop repeat">
-                    <div class="card-content">
-                        <h3 class="card-title">Forever</h3>
-                        <p class="card-description">Run the script over and over</p>
-                        <span class="card-tag">♾️ Control</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image5.png" alt="forever loop">
-                    </div>
+        <!-- Row 12 -->
+        <div class="grid-row">
+            <div class="description">Show the sprite</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image2.png" alt="Show block" width="143" height="63">
+            </div>
+        </div>
+
+        <!-- Row 13 -->
+        <div class="grid-row">
+            <div class="description">Hide the sprite</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image20.png" alt="Hide block" width="144" height="65">
+            </div>
+        </div>
+
+        <!-- Row 14 -->
+        <div class="grid-row">
+            <div class="description">Increases the character's size</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image25.png" alt="Grow block" width="147" height="64">
+            </div>
+        </div>
+
+        <!-- Row 15 -->
+        <div class="grid-row">
+            <div class="description">Decreases the character's size</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image3.png" alt="Shrink block" width="149" height="63">
+            </div>
+        </div>
+
+        <!-- Row 16 -->
+        <div class="grid-row">
+            <div class="description">Set the character size in percentage</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image12.png" alt="Set size block" width="157" height="63">
+            </div>
+        </div>
+
+        <!-- Row 17 -->
+        <div class="grid-row">
+            <div class="description">Change the layer order of the sprite</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image19.png" alt="Go to front block" width="177" height="64">
+            </div>
+        </div>
+
+        <!-- Row 18 -->
+        <div class="grid-row">
+            <div class="description">Make the background scroll in the selected direction and speed</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image15.png" alt="Scroll background block" width="205" height="68">
+            </div>
+        </div>
+
+        <!-- Row 19 -->
+        <div class="grid-row">
+            <div class="description">Stop scrolling</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image24.png" alt="Stop scrolling block" width="157" height="65">
+            </div>
+        </div>
+
+        <!-- Row 20 -->
+        <div class="grid-row">
+            <div class="description">Select selected sound</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image9.png" alt="Play sound block" width="267" height="65">
+            </div>
+        </div>
+
+        <!-- Row 21 -->
+        <div class="grid-row">
+            <div class="description">
+                <strong>Basic Math Addition</strong><br>
+                Drag the number to the input field.
+            </div>
+            <div class="image-container">
+                 <!-- NOTE: This image is local on your computer and won't work online -->
+                <div>
+                    <img src="https://codekidi.org/help/image27.png" alt="Addition block" width="150" height="66">
+                    
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- Appearance Section -->
-        <section class="category-section appearance" data-category="appearance">
-            <h2 class="category-title">
-                <span class="category-badge"></span>
-                Appearance & Display
-            </h2>
-            <div class="cards-grid">
-                <div class="card" data-search="say speak message bubble">
-                    <div class="card-content">
-                        <h3 class="card-title">Say</h3>
-                        <p class="card-description">Show a message in a speech bubble for a specific time</p>
-                        <span class="card-tag">💬 Appearance</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image7.png" alt="say">
-                    </div>
-                </div>
+        <!-- Row 22 -->
+        <div class="grid-row">
+            <div class="description">Basic Math Subtraction</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image4.png" alt="Subtraction block" width="130" height="44">
+            </div>
+        </div>
 
-                <div class="card" data-search="think bubble message">
-                    <div class="card-content">
-                        <h3 class="card-title">Think</h3>
-                        <p class="card-description">Show a message in a thought bubble. Works with wait block</p>
-                        <span class="card-tag">🤔 Appearance</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image6.png" alt="think">
-                    </div>
-                </div>
+        <!-- Row 23 -->
+        <div class="grid-row">
+            <div class="description">Basic Math Multiplication</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help//image10.png" alt="Multiplication block" width="133" height="42">
+            </div>
+        </div>
 
-                <div class="card" data-search="show sprite visible">
-                    <div class="card-content">
-                        <h3 class="card-title">Show</h3>
-                        <p class="card-description">Show the sprite</p>
-                        <span class="card-tag">👁️ Appearance</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image2.png" alt="show">
-                    </div>
-                </div>
-
-                <div class="card" data-search="hide sprite invisible">
-                    <div class="card-content">
-                        <h3 class="card-title">Hide</h3>
-                        <p class="card-description">Hide the sprite</p>
-                        <span class="card-tag">👁️ Appearance</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image20.png" alt="hide">
-                    </div>
-                </div>
-
-                <div class="card" data-search="size grow increase">
-                    <div class="card-content">
-                        <h3 class="card-title">Grow</h3>
-                        <p class="card-description">Increase the character's size</p>
-                        <span class="card-tag">📏 Appearance</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image25.png" alt="grow">
-                    </div>
-                </div>
-
-                <div class="card" data-search="size shrink decrease">
-                    <div class="card-content">
-                        <h3 class="card-title">Shrink</h3>
-                        <p class="card-description">Decrease the character's size</p>
-                        <span class="card-tag">📏 Appearance</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image3.png" alt="shrink">
-                    </div>
-                </div>
-
-                <div class="card" data-search="size percentage">
-                    <div class="card-content">
-                        <h3 class="card-title">Set Size</h3>
-                        <p class="card-description">Set the character size in percentage</p>
-                        <span class="card-tag">📏 Appearance</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image12.png" alt="set size">
-                    </div>
-                </div>
-
-                <div class="card" data-search="layer z-index order">
-                    <div class="card-content">
-                        <h3 class="card-title">Layer Order</h3>
-                        <p class="card-description">Change the layer order of the sprite</p>
-                        <span class="card-tag">📑 Appearance</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image19.png" alt="layer">
-                    </div>
-                </div>
-
-                <div class="card" data-search="scroll background pan">
-                    <div class="card-content">
-                        <h3 class="card-title">Scroll Background</h3>
-                        <p class="card-description">Make the background scroll in the selected direction</p>
-                        <span class="card-tag">🎬 Appearance</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image15.png" alt="scroll">
-                    </div>
-                </div>
-
-                <div class="card" data-search="stop scroll">
-                    <div class="card-content">
-                        <h3 class="card-title">Stop Scroll</h3>
-                        <p class="card-description">Stop scrolling</p>
-                        <span class="card-tag">🎬 Appearance</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image24.png" alt="stop scroll">
-                    </div>
+        <!-- Row 24 -->
+        <div class="grid-row">
+            <div class="description">Basic Math Division</div>
+            <div class="image-container">
+                 <!-- NOTE: This image is local on your computer and won't work online -->
+                <div>
+                    <img src="https://codekidi.org/help/image18.png" alt="Division block" width="130" height="43">
+                   
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- Sound Section -->
-        <section class="category-section sound" data-category="sound">
-            <h2 class="category-title">
-                <span class="category-badge"></span>
-                Sound & Audio
-            </h2>
-            <div class="cards-grid">
-                <div class="card" data-search="sound play audio">
-                    <div class="card-content">
-                        <h3 class="card-title">Play Sound</h3>
-                        <p class="card-description">Select selected sound</p>
-                        <span class="card-tag">🔊 Sound</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image9.png" alt="play sound">
-                    </div>
-                </div>
+        <!-- Row 25 -->
+        <div class="grid-row">
+            <div class="description">Number</div>
+            <div class="image-container">
+                <img src="https://codekidi.org/help/image14.png" alt="Number block" width="53" height="47">
             </div>
-        </section>
+        </div>
 
-        <!-- Math Section -->
-        <section class="category-section math" data-category="math">
-            <h2 class="category-title">
-                <span class="category-badge"></span>
-                Math Operations
-            </h2>
-            <div class="cards-grid">
-                <div class="card" data-search="add addition plus">
-                    <div class="card-content">
-                        <h3 class="card-title">Addition</h3>
-                        <p class="card-description">Basic Math Addition. Drag the number to the input field</p>
-                        <span class="card-tag">➕ Math</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image27.png" alt="addition">
-                    </div>
-                </div>
-
-                <div class="card" data-search="subtract subtraction minus">
-                    <div class="card-content">
-                        <h3 class="card-title">Subtraction</h3>
-                        <p class="card-description">Basic Math Subtraction</p>
-                        <span class="card-tag">➖ Math</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image4.png" alt="subtraction">
-                    </div>
-                </div>
-
-                <div class="card" data-search="multiply multiplication times">
-                    <div class="card-content">
-                        <h3 class="card-title">Multiplication</h3>
-                        <p class="card-description">Basic Math Multiplication</p>
-                        <span class="card-tag">✖️ Math</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image10.png" alt="multiplication">
-                    </div>
-                </div>
-
-                <div class="card" data-search="divide division">
-                    <div class="card-content">
-                        <h3 class="card-title">Division</h3>
-                        <p class="card-description">Basic Math Division</p>
-                        <span class="card-tag">➗ Math</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image18.png" alt="division">
-                    </div>
-                </div>
-
-                <div class="card" data-search="number">
-                    <div class="card-content">
-                        <h3 class="card-title">Number</h3>
-                        <p class="card-description">A numeric value block</p>
-                        <span class="card-tag">🔢 Math</span>
-                    </div>
-                    <div class="card-image">
-                        <img src="https://codekidi.org/help/image14.png" alt="number">
-                    </div>
-                </div>
-            </div>
-        </section>
     </div>
 
-    <script>
-        const searchInput = document.getElementById('searchInput');
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        const cards = document.querySelectorAll('.card');
-        const categorySections = document.querySelectorAll('.category-section');
-
-        let currentFilter = 'all';
-
-        // Search functionality
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            
-            cards.forEach(card => {
-                const searchData = card.getAttribute('data-search').toLowerCase();
-                const title = card.querySelector('.card-title').textContent.toLowerCase();
-                const desc = card.querySelector('.card-description').textContent.toLowerCase();
-                
-                const matches = searchData.includes(searchTerm) || 
-                               title.includes(searchTerm) || 
-                               desc.includes(searchTerm);
-                
-                if (matches && (currentFilter === 'all' || card.closest('.category-section').getAttribute('data-category') === currentFilter)) {
-                    card.style.display = '';
-                } else if (!searchTerm) {
-                    card.style.display = currentFilter === 'all' || card.closest('.category-section').getAttribute('data-category') === currentFilter ? '' : 'none';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-
-            updateSectionVisibility();
-        });
-
-        // Filter functionality
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                filterBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                
-                currentFilter = btn.getAttribute('data-filter');
-                
-                categorySections.forEach(section => {
-                    if (currentFilter === 'all' || section.getAttribute('data-category') === currentFilter) {
-                        section.style.display = '';
-                    } else {
-                        section.style.display = 'none';
-                    }
-                });
-
-                // Reset search when filtering
-                searchInput.value = '';
-                updateSectionVisibility();
-            });
-        });
-
-        function updateSectionVisibility() {
-            categorySections.forEach(section => {
-                const visibleCards = section.querySelectorAll('.card:not([style*="display: none"])');
-                section.style.display = visibleCards.length > 0 ? '' : 'none';
-            });
-        }
-    </script>
 </body>
 </html>
